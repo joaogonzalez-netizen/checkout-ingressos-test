@@ -82,6 +82,8 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
     include: { lots: true, artist: true },
   });
   if (!event || event.status !== "published") throw new CheckoutError("Evento indisponível", "not_found");
+  // Produção sem chave da Asaas: não reserva nada nem tenta cobrar.
+  if (!env.PAYMENTS_ENABLED) throw new CheckoutError("As vendas online ainda não foram abertas. Tente novamente em breve.", "payment");
 
   // Junta repetidos e descarta quantidade zero.
   const merged = new Map<string, number>();

@@ -41,6 +41,10 @@ export const env = {
   get PRIVACY_URL() {
     return process.env.PRIVACY_URL ?? "#";
   },
+  /** Pagamento disponível: chave da Asaas configurada ou modo simulado (dev). */
+  get PAYMENTS_ENABLED() {
+    return !!process.env.ASAAS_API_KEY || (process.env.NODE_ENV !== "production");
+  },
   /** Sem chave da Asaas o app simula as cobranças (só fora de produção). */
   get ASAAS_MOCK() {
     return !process.env.ASAAS_API_KEY && process.env.NODE_ENV !== "production";
