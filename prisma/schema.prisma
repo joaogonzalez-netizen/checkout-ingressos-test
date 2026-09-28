@@ -393,6 +393,8 @@ model PlatformSettings {
   halfPriceText    String?  @map("half_price_text")
   cancellationText String?  @map("cancellation_text")
   feeText          String?  @map("fee_text")
+  // Evento aberto no endereço principal do site (/). Vazio = / vai para o backoffice.
+  homeEventSlug    String?  @map("home_event_slug")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
   @@map("platform_settings")

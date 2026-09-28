@@ -22,10 +22,12 @@ export async function saveSettings(_prev: SettingsState, form: FormData): Promis
     halfPriceText: text("halfPriceText"),
     cancellationText: text("cancellationText"),
     feeText: text("feeText"),
+    homeEventSlug: text("homeEventSlug"),
   };
   if (data.sellerCnpj && !isValidCNPJ(data.sellerCnpj)) return { error: "CNPJ inválido." };
   if (data.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.contactEmail)) return { error: "E-mail de contato inválido." };
   if (data.contactWhatsapp && !isValidMobile(data.contactWhatsapp)) return { error: "WhatsApp inválido: use DDD + número de celular." };
+  if (data.homeEventSlug && !(await db.event.findUnique({ where: { slug: data.homeEventSlug } }))) return { error: "Evento da página inicial não encontrado." };
 
   const before = await db.platformSettings.findUnique({ where: { id: "default" } });
   await db.platformSettings.upsert({ where: { id: "default" }, create: { id: "default", ...data }, update: data });

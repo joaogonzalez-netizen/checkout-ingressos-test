@@ -13,12 +13,37 @@ type Values = {
   halfPriceText: string;
   cancellationText: string;
   feeText: string;
+  homeEventSlug: string;
 };
 
-export function SettingsForm({ initial, missingLegal }: { initial: Values; missingLegal: boolean }) {
+export function SettingsForm({
+  initial,
+  missingLegal,
+  events,
+}: {
+  initial: Values;
+  missingLegal: boolean;
+  events: { slug: string; label: string }[];
+}) {
   const [state, action, pending] = useActionState<SettingsState, FormData>(saveSettings, {});
   return (
     <form action={action} className="bo-form">
+      <div className="bo-card">
+        <h2>Página inicial do site</h2>
+        <label className="bo-field" style={{ maxWidth: 520 }}>
+          <span>Evento aberto no endereço principal</span>
+          <select name="homeEventSlug" defaultValue={initial.homeEventSlug}>
+            <option value="">Nenhum (o endereço principal abre o backoffice)</option>
+            {events.map((e) => (
+              <option key={e.slug} value={e.slug}>
+                {e.label}
+              </option>
+            ))}
+          </select>
+          <span className="bo-hint">Quem acessar o domínio sem caminho cai direto na página de vendas desse evento.</span>
+        </label>
+      </div>
+
       <div className="bo-card">
         <h2>Quem vende</h2>
         <p className="bo-hint" style={{ marginTop: -6, marginBottom: 12 }}>

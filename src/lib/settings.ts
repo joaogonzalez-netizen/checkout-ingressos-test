@@ -12,6 +12,7 @@ export type PublicSettings = {
   halfPriceText: string;
   cancellationText: string;
   feeText: string;
+  homeEventSlug: string | null;
 };
 
 /** Configurações da operação com os textos padrão aplicados quando vazios. */
@@ -26,5 +27,6 @@ export const getSettings = cache(async (): Promise<PublicSettings> => {
     halfPriceText: s?.halfPriceText || DEFAULT_HALF_PRICE_TEXT,
     cancellationText: s?.cancellationText || DEFAULT_CANCELLATION_TEXT,
     feeText: s?.feeText || DEFAULT_FEE_TEXT,
+    homeEventSlug: s?.homeEventSlug ?? null,
   };
 });
