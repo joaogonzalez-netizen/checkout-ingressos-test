@@ -104,5 +104,6 @@ export function toTemplateData(e: FullEvent, opts: { pixelEnabled: boolean; sett
     termsUrl: env.TERMS_URL,
     privacyUrl: env.PRIVACY_URL,
     pixelEnabled: opts.pixelEnabled,
+    demo: env.ASAAS_MOCK,
   };
 }

@@ -289,3 +289,5 @@ a.bo-btn-primary, a.bo-btn-primary:hover { color: var(--white); }
 @media (max-width: 640px) { .bo-strength ul { grid-template-columns: 1fr; } }
 .bo-sidebar .bo-user-link { display: block; font-size: 12px; padding: 4px 10px 10px; opacity: 0.85; }
 .bo-lot .bo-lot-desc { grid-column: 1 / -1; }
+
+.bo-demo-banner { background: #1d2327; color: #ffe08a; font-size: 12.5px; font-weight: 600; padding: 8px 14px; border-radius: 10px; margin: 0 0 16px; }

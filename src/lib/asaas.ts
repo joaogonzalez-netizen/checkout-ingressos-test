@@ -1,6 +1,7 @@
 import "server-only";
 import { env } from "./env";
 import { randomToken } from "./crypto";
+import { db } from "./db";
 
 // Cliente da API v3 da Asaas (https://docs.asaas.com).
 // PENDENTE (Arquitetura): homologar com a Asaas o payload exato do webhook antes de ir a produção.
@@ -140,16 +141,26 @@ class HttpAsaasClient implements AsaasClient {
 }
 
 // ---------------------------------------------------------------------------
-// Modo simulado (sem ASAAS_API_KEY, fora de produção). Guarda as cobranças em memória
-// e expõe uma "fatura" local em /dev/asaas/[paymentId] para aprovar ou recusar.
-
-type MockStore = Map<string, AsaasPayment>;
-const globalForMock = globalThis as unknown as { asaasMock?: MockStore };
-const mockStore: MockStore = (globalForMock.asaasMock ??= new Map());
+// Modo simulado (dev sem chave, ou DEMO_MODE). As cobranças ficam na tabela mock_payments e a
+// "fatura" local em /dev/asaas/[paymentId] permite aprovar, recusar ou deixar vencer.
 
 // PNG 1x1 transparente: o QR real vem da Asaas.
 const PLACEHOLDER_QR =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+
+type MockRow = { id: string; status: string; value: number; billingType: string; externalReference: string | null; deleted: boolean };
+
+function toPayment(row: MockRow): AsaasPayment {
+  return {
+    id: row.id,
+    status: row.status as AsaasPaymentStatus,
+    value: row.value,
+    billingType: row.billingType,
+    externalReference: row.externalReference,
+    invoiceUrl: `${env.APP_URL}/dev/asaas/${row.id}`,
+    deleted: row.deleted,
+  };
+}
 
 class MockAsaasClient implements AsaasClient {
   async createCustomer() {
@@ -157,17 +168,15 @@ class MockAsaasClient implements AsaasClient {
   }
 
   async createPayment(input: CreatePaymentInput) {
-    const id = `pay_mock_${randomToken(8)}`;
-    const payment: AsaasPayment = {
-      id,
-      status: "PENDING",
-      value: input.totalCents / 100,
-      billingType: input.method === "pix" ? "PIX" : "CREDIT_CARD",
-      externalReference: input.externalReference,
-      invoiceUrl: `${env.APP_URL}/dev/asaas/${id}`,
-    };
-    mockStore.set(id, payment);
-    return payment;
+    const row = await db.mockPayment.create({
+      data: {
+        id: `pay_mock_${randomToken(8)}`,
+        value: input.totalCents / 100,
+        billingType: input.method === "pix" ? "PIX" : "CREDIT_CARD",
+        externalReference: input.externalReference,
+      },
+    });
+    return toPayment(row);
   }
 
   async getPixQrCode(paymentId: string) {
@@ -175,28 +184,25 @@ class MockAsaasClient implements AsaasClient {
   }
 
   async getPayment(paymentId: string) {
-    const payment = mockStore.get(paymentId);
-    if (!payment) throw new AsaasError("Cobrança simulada não encontrada", 404);
-    return payment;
+    const row = await db.mockPayment.findUnique({ where: { id: paymentId } });
+    if (!row) throw new AsaasError("Cobrança simulada não encontrada", 404);
+    return toPayment(row);
   }
 
   async deletePayment(paymentId: string) {
-    const payment = mockStore.get(paymentId);
-    if (!payment || payment.status !== "PENDING") return false;
-    payment.deleted = true;
-    return true;
+    const updated = await db.mockPayment.updateMany({ where: { id: paymentId, status: "PENDING" }, data: { deleted: true } });
+    return updated.count === 1;
   }
 }
 
-export function mockSetStatus(paymentId: string, status: AsaasPaymentStatus): AsaasPayment | null {
-  const payment = mockStore.get(paymentId);
-  if (!payment) return null;
-  payment.status = status;
-  return payment;
+export async function mockSetStatus(paymentId: string, status: AsaasPaymentStatus): Promise<AsaasPayment | null> {
+  const row = await db.mockPayment.update({ where: { id: paymentId }, data: { status } }).catch(() => null);
+  return row ? toPayment(row) : null;
 }
 
-export function mockGetPayment(paymentId: string): AsaasPayment | null {
-  return mockStore.get(paymentId) ?? null;
+export async function mockGetPayment(paymentId: string): Promise<AsaasPayment | null> {
+  const row = await db.mockPayment.findUnique({ where: { id: paymentId } });
+  return row ? toPayment(row) : null;
 }
 
 export function asaas(): AsaasClient {

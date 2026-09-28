@@ -397,3 +397,17 @@ model PlatformSettings {
 
   @@map("platform_settings")
 }
+
+// Cobranças do modo simulado (dev e DEMO_MODE). Ficam no banco porque, na Vercel, a memória do
+// servidor não sobrevive entre requisições.
+model MockPayment {
+  id                String   @id
+  status            String   @default("PENDING")
+  value             Float
+  billingType       String   @map("billing_type")
+  externalReference String?  @map("external_reference")
+  deleted           Boolean  @default(false)
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  @@map("mock_payments")
+}

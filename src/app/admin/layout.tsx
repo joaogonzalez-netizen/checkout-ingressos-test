@@ -2,6 +2,7 @@ import "./admin.css";
 import { requireAdmin } from "@/lib/auth";
 import { logout } from "../login/actions";
 import { NavLink } from "./NavLink";
+import { env } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +26,14 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
           </button>
         </form>
       </aside>
-      <main className="bo-main">{children}</main>
+      <main className="bo-main">
+        {env.ASAAS_MOCK && (
+          <p className="bo-demo-banner">
+            🧪 Ambiente de teste: pagamentos simulados, sem Asaas. Limpe os dados em Configurações quando quiser recomeçar.
+          </p>
+        )}
+        {children}
+      </main>
     </div>
   );
 }

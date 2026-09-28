@@ -1,6 +1,8 @@
 import { requireAdmin } from "@/lib/auth";
 import { getSettings } from "@/lib/settings";
 import { SettingsForm } from "./SettingsForm";
+import { ResetDemo } from "./ResetDemo";
+import { env } from "@/lib/env";
 
 export const metadata = { title: "Configurações · Backoffice" };
 
@@ -28,6 +30,7 @@ export default async function SettingsPage() {
           feeText: s.feeText,
         }}
       />
+      {env.ASAAS_MOCK && <ResetDemo />}
     </>
   );
 }

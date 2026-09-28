@@ -41,12 +41,19 @@ export const env = {
   get PRIVACY_URL() {
     return process.env.PRIVACY_URL ?? "#";
   },
-  /** Pagamento disponível: chave da Asaas configurada ou modo simulado (dev). */
-  get PAYMENTS_ENABLED() {
-    return !!process.env.ASAAS_API_KEY || (process.env.NODE_ENV !== "production");
+  /**
+   * Ambiente de demonstração (DEMO_MODE=1): pagamentos sempre simulados, mesmo em produção,
+   * faixa "Ambiente de teste" nas páginas e ferramentas de teste liberadas.
+   */
+  get DEMO_MODE() {
+    return process.env.DEMO_MODE === "1";
   },
-  /** Sem chave da Asaas o app simula as cobranças (só fora de produção). */
+  /** Cobranças simuladas: modo demo, ou dev sem chave da Asaas. Nunca em produção real. */
   get ASAAS_MOCK() {
-    return !process.env.ASAAS_API_KEY && process.env.NODE_ENV !== "production";
+    return this.DEMO_MODE || (!process.env.ASAAS_API_KEY && process.env.NODE_ENV !== "production");
+  },
+  /** Pagamento disponível: simulado ou com chave da Asaas. */
+  get PAYMENTS_ENABLED() {
+    return this.ASAAS_MOCK || !!process.env.ASAAS_API_KEY;
   },
 };

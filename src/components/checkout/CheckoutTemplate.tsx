@@ -253,6 +253,11 @@ export function CheckoutTemplate({ data, mode = "live" }: Props) {
   return (
     <div className="tpl" ref={rootRef} data-theme={theme} style={paletteStyle(data.palette)}>
       {!live && <div className="preview-banner">Pré-visualização — a página pública só existe depois de publicar.</div>}
+      {live && data.demo && (
+        <div className="demo-banner" role="note">
+          🧪 Ambiente de teste · os pagamentos são simulados e nenhum valor é cobrado
+        </div>
+      )}
       <header className="nav">
         <div className="nav-inner">
           <div className="nav-logo">
@@ -377,7 +382,7 @@ export function CheckoutTemplate({ data, mode = "live" }: Props) {
                 </div>
                 {pix.devPayUrl && (
                   <p className="secure-note">
-                    Modo simulado (sem chave da Asaas): <a href={pix.devPayUrl} target="_blank" rel="noreferrer">simular pagamento</a>
+                    Ambiente de teste: <a href={pix.devPayUrl}>simular o pagamento deste Pix</a>
                   </p>
                 )}
               </div>

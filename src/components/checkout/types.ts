@@ -73,4 +73,6 @@ export type TemplateData = {
   termsUrl: string;
   privacyUrl: string;
   pixelEnabled: boolean;
+  /** Pagamentos simulados (dev ou DEMO_MODE): mostra a faixa "Ambiente de teste". */
+  demo: boolean;
 };

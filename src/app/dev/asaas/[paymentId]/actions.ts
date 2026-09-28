@@ -18,7 +18,7 @@ export async function simulatePayment(form: FormData) {
   if (!env.ASAAS_MOCK) throw new Error("Disponível só em modo simulado");
   const paymentId = String(form.get("paymentId"));
   const event = String(form.get("outcome"));
-  const payment = mockSetStatus(paymentId, STATUS_BY_EVENT[event] ?? "PENDING");
+  const payment = await mockSetStatus(paymentId, STATUS_BY_EVENT[event] ?? "PENDING");
   if (!payment) throw new Error("Cobrança não encontrada");
 
   await handleAsaasEvent({ id: `evt_mock_${randomUUID()}`, event, payment });
