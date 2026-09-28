@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { VIDEO_MAX_BYTES, VIDEO_MAX_SECONDS, VIDEO_SPEC, VIDEO_TYPES, formatDuration, formatMB, isReelsFormat } from "@/lib/media-rules";
 import { MediaSpec } from "./MediaSpec";
 import { uploadWithProgress } from "./upload";
+import { upload as blobUpload } from "@vercel/blob/client";
 
 type Current = { url: string; posterUrl: string | null; width: number; height: number; duration: number } | null;
 type Meta = { width: number; height: number; duration: number; poster: Blob | null };
@@ -56,7 +57,11 @@ function readVideo(file: File): Promise<Meta> {
 }
 
 
-export function VideoUpload({ endpoint, current }: { endpoint: string; current: Current }) {
+/**
+ * direct = true na Vercel: o vídeo sobe do navegador direto para o Vercel Blob (as funções aceitam
+ * só 4,5 MB por requisição) e depois é registrado na rota de mídia.
+ */
+export function VideoUpload({ endpoint, current, direct = false }: { endpoint: string; current: Current; direct?: boolean }) {
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
   const [video, setVideo] = useState(current);
@@ -89,7 +94,26 @@ export function VideoUpload({ endpoint, current }: { endpoint: string; current: 
     }
     const form = new FormData();
     form.set("kind", "video");
-    form.set("file", file);
+    if (direct) {
+      const eventId = endpoint.match(/events\/([^/]+)\/media/)?.[1];
+      const ext = file.type === "video/quicktime" ? "mov" : "mp4";
+      try {
+        const blob = await blobUpload(`events/${eventId}/video-${Date.now()}.${ext}`, file, {
+          access: "public",
+          contentType: file.type,
+          handleUploadUrl: `${endpoint}/upload-token`,
+          multipart: file.size > 20 * 1024 * 1024,
+          onUploadProgress: ({ percentage }) => setStatus(`Enviando… ${Math.round(percentage)}%`),
+        });
+        form.set("blobUrl", blob.url);
+      } catch (err) {
+        setStatus(null);
+        return setError(err instanceof Error ? err.message : "Falha ao enviar o vídeo.");
+      }
+      setStatus("Finalizando…");
+    } else {
+      form.set("file", file);
+    }
     form.set("width", String(meta.width));
     form.set("height", String(meta.height));
     form.set("duration", String(meta.duration));

@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { authorizeAdminApi, badRequest } from "@/lib/admin-api";
 import { ImageError, processImage } from "@/lib/image-processing";
-import { deleteObject, mediaUrl, putObject } from "@/lib/storage";
+import { deleteObject, putObject } from "@/lib/storage";
 import { randomToken } from "@/lib/crypto";
 import type { ImageKind } from "@/lib/media-rules";
 
@@ -40,9 +40,8 @@ export async function POST(req: NextRequest, ctx: RouteContext<"/api/admin/artis
     throw err;
   }
   const key = `artists/${id}/${kind}-${randomToken(8)}.${img.ext}`;
-  await putObject(key, img.data);
+  const url = await putObject(key, img.data, img.mime);
   const col = COLUMNS[kind];
-  const url = mediaUrl(key);
   try {
     await db.artist.update({ where: { id }, data: { [col.url]: url, [col.key]: key } });
   } catch (err) {

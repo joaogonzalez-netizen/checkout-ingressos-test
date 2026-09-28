@@ -6,6 +6,25 @@ import { IMAGE_SPECS, IMAGE_TYPES, formatMB, type ImageKind } from "@/lib/media-
 import { MediaSpec } from "./MediaSpec";
 import { uploadWithProgress } from "./upload";
 
+/** A Vercel aceita até 4,5 MB por requisição: fotos maiores são reduzidas no navegador antes do envio. */
+const DIRECT_LIMIT = 4 * 1024 * 1024;
+
+async function shrinkIfNeeded(file: File, maxWidth: number): Promise<File> {
+  if (file.size <= DIRECT_LIMIT) return file;
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, (maxWidth * 1.25) / bitmap.width);
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  const keepAlpha = file.type === "image/png";
+  for (const quality of [0.9, 0.8, 0.7]) {
+    const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, keepAlpha ? "image/webp" : "image/jpeg", quality));
+    if (blob && blob.size <= DIRECT_LIMIT) return new File([blob], file.name.replace(/\.\w+$/, keepAlpha ? ".webp" : ".jpg"), { type: blob.type });
+  }
+  return file;
+}
+
 type Props = {
   /** Rota de upload (POST multipart, DELETE ?kind=). */
   endpoint: string;
@@ -33,7 +52,7 @@ export function ImageUpload({ endpoint, kind, currentUrl, inherited, disabledRea
     if (file.size > spec.maxBytes) return setError(`A imagem tem ${formatMB(file.size)}; o limite é ${formatMB(spec.maxBytes)}.`);
     const form = new FormData();
     form.set("kind", kind);
-    form.set("file", file);
+    form.set("file", await shrinkIfNeeded(file, spec.output.width ?? 1920));
     setProgress(0);
     const res = await uploadWithProgress(endpoint, form, setProgress);
     setProgress(null);

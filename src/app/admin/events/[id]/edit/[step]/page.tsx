@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { toLocalDate, toLocalTime, todayLocal } from "@/lib/dates";
 import { suggestEventSlug } from "@/lib/slug";
 import { getSettings } from "@/lib/settings";
+import { usesBlob } from "@/lib/storage";
 import { defaultHeadline, toTemplateData } from "@/lib/template-data";
 import { eventChecklist, canPublish } from "@/lib/event-checklist";
 import { formatBRL } from "@/lib/money";
@@ -60,6 +61,7 @@ export default async function EditStep({ params }: PageProps<"/admin/events/[id]
     body = (
       <Step2Page
         eventId={id}
+        directVideoUpload={usesBlob()}
         action={saveStep2.bind(null, id)}
         base={toTemplateData(event, { pixelEnabled: false, settings: await getSettings() })}
         initial={{

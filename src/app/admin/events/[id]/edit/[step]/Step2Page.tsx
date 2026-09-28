@@ -24,8 +24,10 @@ export function Step2Page({
   initial,
   media,
   artist,
+  directVideoUpload,
 }: {
   eventId: string;
+  directVideoUpload: boolean;
   action: (prev: StepState, form: FormData) => Promise<StepState>;
   base: TemplateData;
   initial: Values;
@@ -83,7 +85,7 @@ export function Step2Page({
           </p>
           <ImageUpload endpoint={endpoint} kind="cover" currentUrl={media.cover} inherited={inherit(artist.cover)} />
           <ImageUpload endpoint={endpoint} kind="cover_mobile" currentUrl={media.coverMobile} inherited={inherit(artist.coverMobile)} />
-          <VideoUpload endpoint={endpoint} current={media.video} />
+          <VideoUpload endpoint={endpoint} current={media.video} direct={directVideoUpload} />
           <ImageUpload
             endpoint={endpoint}
             kind="og_image"
