@@ -52,3 +52,10 @@ next-env.d.ts
 
 # configuração local de ferramentas (preview)
 /.claude
+
+# credenciais de produção guardadas localmente
+/.producao-*.txt
+
+# arquivos da integração Neon para agentes (fora do escopo do projeto)
+/.agents
+/skills-lock.json

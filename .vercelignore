@@ -1,0 +1,11 @@
+# Nunca enviar para a Vercel: segredos locais, banco e uploads de dev, credenciais de produção.
+.env
+.env.*
+!.env.example
+.pglite
+.uploads
+.producao-*.txt
+.agents
+skills-lock.json
+.claude
+src/generated

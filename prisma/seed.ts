@@ -11,11 +11,20 @@ async function main() {
   const password = process.env.ADMIN_PASSWORD ?? "";
   if (!email || password.length < 10) throw new Error("Defina ADMIN_EMAIL e ADMIN_PASSWORD (mín. 10 caracteres) no .env");
 
+  // Em produção a senha do seed é temporária: troca obrigatória no primeiro login.
   await db.user.upsert({
     where: { email },
     update: {},
-    create: { email, name: "Admin", role: "admin", passwordHash: await bcrypt.hash(password, 12) },
+    create: {
+      email,
+      name: process.env.ADMIN_NAME ?? "Admin",
+      role: "admin",
+      passwordHash: await bcrypt.hash(password, 12),
+      mustChangePassword: process.env.NODE_ENV === "production" || process.env.SEED_FORCE_PASSWORD_CHANGE === "1",
+    },
   });
+  // Evento de exemplo só em dev (SEED_SAMPLE_EVENT=0 desliga).
+  if (process.env.SEED_SAMPLE_EVENT === "0") return;
 
   const artist = await db.artist.upsert({
     where: { slug: "ivangelica" },

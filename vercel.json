@@ -1,3 +1,5 @@
 {
-  "crons": [{ "path": "/api/cron/expire-holds", "schedule": "* * * * *" }]
+  "framework": "nextjs",
+  "regions": ["gru1"],
+  "crons": [{ "path": "/api/cron/expire-holds", "schedule": "0 6 * * *" }]
 }
