@@ -9,7 +9,7 @@ import { formatCpfCnpj, formatPhone, isValidCpfCnpj, isValidMobile, onlyDigits }
 import { readCookie, trackFunnel } from "./pixel-client";
 import type { TemplateData } from "./types";
 import { VslVideo } from "./VslVideo";
-import { EventFooter, EventInfo } from "./EventInfo";
+import { BuyCta, EventFooter, EventInfo, type BuyCtaInfo } from "./EventInfo";
 
 type Props = {
   data: TemplateData;
@@ -77,6 +77,17 @@ export function CheckoutTemplate({ data, mode = "live" }: Props) {
   const [shared, setShared] = useState(false);
   const [showFee, setShowFee] = useState(false);
 
+  // CTAs da página (primeira dobra, vídeo, informações) levam para a seção de compra.
+  function goToCheckout() {
+    document.getElementById("checkoutSection")?.scrollIntoView({ behavior: "smooth" });
+  }
+  const availablePrices = data.lots.filter((l) => l.available).map((l) => l.priceCents);
+  const buyCta: BuyCtaInfo = {
+    soldOut: availablePrices.length === 0,
+    fromLabel: availablePrices.length ? `a partir de ${formatBRL(Math.min(...availablePrices))}` : null,
+    onClick: goToCheckout,
+  };
+
   async function share() {
     const url = window.location.href.split("?")[0];
     const title = `${data.artistName} · ${data.showName}`;
@@ -105,17 +116,22 @@ export function CheckoutTemplate({ data, mode = "live" }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
 
   // Primeira dobra: o header encolhe o quanto for preciso para data, horário e local caberem na tela.
-  // O CSS traz uma reserva aproximada (--fold-reserve); aqui ela vira a altura medida do nav + faixa.
+  // O CSS traz uma reserva aproximada (--fold-reserve); aqui ela vira a altura medida das faixas
+  // de aviso + nav + faixa do evento (que inclui o CTA de compra).
   useEffect(() => {
     const root = rootRef.current;
     const nav = root?.querySelector<HTMLElement>("header.nav");
     const strip = root?.querySelector<HTMLElement>(".event-strip");
     if (!root || !nav || !strip) return;
-    const update = () => root.style.setProperty("--fold-reserve", `${nav.offsetHeight + strip.offsetHeight + 12}px`);
+    const banners = [...root.querySelectorAll<HTMLElement>(".demo-banner, .preview-banner")];
+    const update = () =>
+      root.style.setProperty(
+        "--fold-reserve",
+        `${[nav, strip, ...banners].reduce((h, el) => h + el.offsetHeight, 0) + 12}px`,
+      );
     update();
     const ro = new ResizeObserver(update);
-    ro.observe(nav);
-    ro.observe(strip);
+    for (const el of [nav, strip, ...banners]) ro.observe(el);
     return () => ro.disconnect();
   }, []);
 
@@ -286,7 +302,7 @@ export function CheckoutTemplate({ data, mode = "live" }: Props) {
 
       <div className="event-strip">
         <div className="event-strip-inner">
-          <div className="event-eyebrow">Finalizando compra</div>
+          <div className="event-eyebrow">{buyCta.soldOut ? "Ingressos esgotados" : "Ingressos à venda"}</div>
           <div className="event-title">{data.showName}</div>
           <div className="event-chips">
             {data.ageRatingLabel && (
@@ -327,6 +343,7 @@ export function CheckoutTemplate({ data, mode = "live" }: Props) {
               </div>
             </div>
           </div>
+          <BuyCta info={buyCta} className="strip-cta" />
         </div>
       </div>
 
@@ -339,11 +356,7 @@ export function CheckoutTemplate({ data, mode = "live" }: Props) {
               <Headline text={data.vslHeadline} city={data.city} />
             </h1>
             {data.vslSubtitle && <p className="vsl-sub">{data.vslSubtitle}</p>}
-            <button
-              className="vsl-cta"
-              type="button"
-              onClick={() => document.getElementById("checkoutSection")?.scrollIntoView({ behavior: "smooth" })}
-            >
+            <button className="vsl-cta" type="button" onClick={goToCheckout}>
               {data.vslCtaLabel} ↓
             </button>
             <div className="vsl-trust">🔒 Compra segura · ingresso enviado por e-mail na hora</div>
@@ -351,6 +364,9 @@ export function CheckoutTemplate({ data, mode = "live" }: Props) {
           {data.video && <VslVideo video={data.video} />}
         </div>
       </section>
+
+      {/* Informações do evento antes da compra; a compra vem logo depois. */}
+      <EventInfo data={data} buyCta={buyCta} />
 
       <div className="wrap" id="checkoutSection">
         <div className="checkout-heading">
@@ -749,7 +765,6 @@ export function CheckoutTemplate({ data, mode = "live" }: Props) {
         </div>
       </div>
 
-      <EventInfo data={data} />
       <EventFooter data={data} />
     </div>
   );

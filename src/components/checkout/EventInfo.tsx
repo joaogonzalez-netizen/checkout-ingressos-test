@@ -78,7 +78,21 @@ function ListenButton({ text }: { text: string }) {
   );
 }
 
-export function EventInfo({ data }: { data: TemplateData }) {
+export type BuyCtaInfo = { soldOut: boolean; fromLabel: string | null; onClick: () => void };
+
+/** Botão de compra: leva até a seção "Finalize sua compra". */
+export function BuyCta({ info, className = "" }: { info: BuyCtaInfo; className?: string }) {
+  return (
+    <div className={`buy-cta ${className}`}>
+      <button type="button" className="vsl-cta" onClick={info.onClick}>
+        {info.soldOut ? "Ver ingressos" : "Comprar ingressos"} ↓
+      </button>
+      {info.fromLabel && <span className="buy-cta-from">{info.fromLabel} · parcele em até 12x</span>}
+    </div>
+  );
+}
+
+export function EventInfo({ data, buyCta }: { data: TemplateData; buyCta?: BuyCtaInfo }) {
   const s = data.seller;
   const lotsWithDescription = data.lots.filter((l) => l.description);
   const hasHalfPrice = data.lots.some((l) => l.isHalfPrice);
@@ -131,6 +145,8 @@ export function EventInfo({ data }: { data: TemplateData }) {
             </>
           )}
         </section>
+
+        {buyCta && <BuyCta info={buyCta} className="info-cta" />}
 
         {lotsWithDescription.length > 0 && (
           <section className="info-section" id="tipos-de-ingresso">
@@ -188,6 +204,8 @@ export function EventInfo({ data }: { data: TemplateData }) {
             </div>
           </section>
         )}
+
+        {buyCta && <BuyCta info={buyCta} className="info-cta" />}
       </div>
     </div>
   );
