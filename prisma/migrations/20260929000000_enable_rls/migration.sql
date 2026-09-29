@@ -1,0 +1,16 @@
+-- Supabase expõe o schema public pela API REST (chave anon). RLS ligado sem políticas bloqueia
+-- esse acesso; o app conecta como dono das tabelas, que ignora RLS. Sem efeito em Neon/PGlite.
+ALTER TABLE "users" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "artists" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "events" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "event_media" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "ticket_lots" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "seats" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "orders" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "order_items" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "tickets" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "checkin_access" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "audit_log" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "webhook_events" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "platform_settings" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "mock_payments" ENABLE ROW LEVEL SECURITY;
