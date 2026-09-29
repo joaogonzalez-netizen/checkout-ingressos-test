@@ -2,6 +2,7 @@ import "server-only";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
 import { env } from "./env";
+import { pgPoolConfig } from "./db-config";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
@@ -9,7 +10,7 @@ function createClient() {
   // PGlite (banco de dev) tem uma única sessão compartilhada por todas as conexões:
   // com DATABASE_POOL_MAX=1 as queries são serializadas e as transações não se misturam.
   const max = Number(process.env.DATABASE_POOL_MAX) || undefined;
-  const adapter = new PrismaPg({ connectionString: env.DATABASE_URL, max });
+  const adapter = new PrismaPg(pgPoolConfig(env.DATABASE_URL, max));
   return new PrismaClient({ adapter });
 }
 

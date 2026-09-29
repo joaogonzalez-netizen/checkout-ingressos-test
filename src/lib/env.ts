@@ -8,8 +8,12 @@ function required(name: string): string {
 
 // Lido sob demanda para não quebrar o build quando uma variável só existe em runtime.
 export const env = {
+  /**
+   * Banco do app. SUPA_POSTGRES_URL (Supabase via Vercel, transaction pooler) tem prioridade sobre
+   * DATABASE_URL, que o Neon ainda ocupa enquanto fica como reserva.
+   */
   get DATABASE_URL() {
-    return required("DATABASE_URL");
+    return process.env.SUPA_POSTGRES_URL || required("DATABASE_URL");
   },
   get APP_URL() {
     return (process.env.APP_URL ?? "http://localhost:3000").replace(/\/$/, "");

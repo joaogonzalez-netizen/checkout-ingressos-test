@@ -10,8 +10,9 @@ import {
   DEFAULT_FEE_TEXT,
   DEFAULT_HALF_PRICE_TEXT,
 } from "../src/lib/legal-defaults";
+import { pgPoolConfig } from "../src/lib/db-config";
 
-const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }) });
+const db = new PrismaClient({ adapter: new PrismaPg(pgPoolConfig(process.env.DATABASE_URL!)) });
 
 const SAMPLE_SLUG = "ivangelica-belo-horizonte-2026-11-20";
 
