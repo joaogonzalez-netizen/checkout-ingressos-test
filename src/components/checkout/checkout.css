@@ -54,14 +54,7 @@
   display: flex; align-items: center; justify-content: center; font-size: 15px;
 }
 
-.tpl .event-strip {
-  background: linear-gradient(135deg, var(--plum-deep), var(--plum-mid) 60%, var(--magenta));
-  color: var(--cream); padding: 20px 20px 22px;
-}
-.tpl .event-strip-inner { max-width: 1000px; margin: 0 auto; }
 .tpl .event-eyebrow { font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.75; margin-bottom: 8px; }
-.tpl .event-title { font-style: italic; font-weight: 900; font-size: clamp(24px, 5vw, 36px); margin: 0 0 6px; }
-.tpl .event-meta { font-size: 12.5px; opacity: 0.85; }
 
 .tpl .vsl-intro { background: var(--surface-2); border-bottom: 1px solid var(--border); padding: 44px 20px 52px; }
 .tpl .vsl-inner { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 32px; align-items: center; }
@@ -224,22 +217,64 @@
   background: #fff4cc; color: #6b5100; font-size: 12px; text-align: center; padding: 8px 12px; font-weight: 600;
 }
 
-/* Header (capa): sempre inteiro, sem corte, e sem empurrar data/local para fora da primeira dobra.
-   A altura máxima reserva espaço para o nav e a faixa do evento (--fold-reserve).
-   Desktop: até 70% da largura. Celular: largura toda. A sobra mostra a própria arte desfocada. */
+/* Primeira dobra: capa desfocada sempre escura ao fundo, informações à esquerda e a capa inteira (sem corte) à direita.
+   Texto sempre claro: o fundo é escuro em qualquer tema e com qualquer arte. */
 .tpl { --fold-reserve: 330px; }
-@media (min-width: 860px) { .tpl { --fold-reserve: 290px; } }
-.tpl .event-cover { position: relative; overflow: hidden; background: var(--plum-deep); display: flex; justify-content: center; }
-.tpl .event-cover-bg {
-  position: absolute; inset: -40px; background-size: cover; background-position: center;
-  filter: blur(32px) saturate(1.2); opacity: 0.55; transform: scale(1.1);
+@media (min-width: 860px) { .tpl { --fold-reserve: 200px; } }
+.tpl .event-hero {
+  position: relative; overflow: hidden; isolation: isolate; color: #fff;
+  background:
+    radial-gradient(120% 90% at 85% 0%, color-mix(in srgb, var(--magenta) 38%, transparent), transparent 60%),
+    color-mix(in srgb, var(--plum-deep) 62%, #07050b);
 }
-.tpl .event-cover picture { position: relative; display: flex; justify-content: center; width: 100%; }
-.tpl .event-cover img {
-  display: block; width: auto; height: auto; max-width: 100%;
-  max-height: max(220px, calc(100svh - var(--fold-reserve)));
+.tpl .event-hero-bg {
+  position: absolute; inset: -60px; z-index: -2; background-size: cover; background-position: center;
+  filter: blur(38px) saturate(1.15) brightness(0.5); transform: scale(1.08);
 }
-@media (min-width: 860px) { .tpl .event-cover img { max-width: 70%; } }
+.tpl .event-hero::after {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(180deg, rgba(7, 5, 11, 0.42), rgba(7, 5, 11, 0.74));
+}
+.tpl .event-hero-inner {
+  max-width: 1000px; margin: 0 auto; padding: 28px 20px 44px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 36px; align-items: center;
+}
+.tpl .event-hero-media { position: relative; justify-self: center; max-width: 100%; line-height: 0; order: -1; }
+.tpl .event-hero-media picture { display: block; }
+.tpl .event-hero-media img {
+  display: block; width: auto; height: auto; max-width: 100%; border-radius: 18px;
+  max-height: max(200px, calc(100svh - var(--fold-reserve)));
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.tpl .hero-share {
+  position: absolute; left: 50%; bottom: -22px; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 8px;
+  background: #fff; color: var(--plum-deep); border: none; border-radius: 999px; padding: 12px 22px; min-height: 44px;
+  font: inherit; font-size: 13.5px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1.2;
+  cursor: pointer; white-space: nowrap; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.tpl .hero-share:hover { background: color-mix(in srgb, #fff 90%, var(--gold)); }
+.tpl .event-hero-info { min-width: 0; padding-top: 14px; }
+.tpl .event-title {
+  font-weight: 800; font-size: clamp(26px, 4.4vw, 44px); line-height: 1.08; letter-spacing: -0.01em; text-transform: uppercase;
+  margin: 0 0 22px; text-wrap: balance;
+}
+.tpl .hero-facts { list-style: none; margin: 0 0 20px; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.tpl .hero-facts li { display: flex; align-items: flex-start; gap: 12px; }
+.tpl .hero-facts svg { flex-shrink: 0; margin-top: 3px; opacity: 0.85; }
+.tpl .hero-facts strong { display: block; font-size: clamp(17px, 2.2vw, 20px); font-weight: 600; line-height: 1.35; }
+.tpl .hero-facts span { display: block; font-size: 14.5px; opacity: 0.8; margin-top: 2px; }
+.tpl .hero-facts a { color: var(--gold); font-weight: 700; }
+.tpl .hero-facts a:hover { text-decoration: underline; }
+.tpl .hero-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 4px; }
+@media (min-width: 860px) {
+  .tpl .event-hero-inner { grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr); gap: 56px; padding: 36px 20px 56px; }
+  .tpl .event-hero-media { order: 0; justify-self: end; }
+  .tpl .event-hero-info { padding-top: 0; }
+}
+@media (max-width: 640px) {
+  .tpl .event-hero-inner { padding: 16px 16px 36px; gap: 30px; }
+  .tpl .event-title { margin-bottom: 16px; }
+  .tpl .hero-facts { gap: 11px; margin-bottom: 16px; }
+}
 
 /* Vídeo da VSL: formato Reels (9:16), com o texto e o CTA à esquerda */
 .tpl .vsl-inner.with-reels { max-width: 1000px; grid-template-columns: 1fr; gap: 28px; }
@@ -305,21 +340,17 @@
   .tpl .ticket-stepper button { width: 38px; height: 38px; }
 }
 
-/* Faixa do evento: selos (classificação, presencial, 12x) e compartilhar */
-.tpl .event-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0 4px; }
+/* Selos da primeira dobra: classificação indicativa e parcelamento */
 .tpl .age-chip {
-  display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 6px;
+  display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 32px; padding: 0 6px;
   border-radius: 6px; font-weight: 900; font-size: 14px; color: #fff; border: 2px solid rgba(255, 255, 255, 0.85);
 }
 .tpl .age-L { background: #0c9447; } .tpl .age-10 { background: #0f7dc2; } .tpl .age-12 { background: #f8c411; color: #1c1c1c; }
 .tpl .age-14 { background: #e67824; } .tpl .age-16 { background: #db2827; } .tpl .age-18 { background: #1d1815; }
-.tpl .chip-soft, .tpl .chip-installments, .tpl .chip-share {
-  font-size: 12.5px; font-weight: 600; padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.1); color: var(--cream);
+.tpl .chip-installments {
+  display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; padding: 8px 16px; border-radius: 999px;
+  background: #4f8a1f; color: #fff;
 }
-.tpl .chip-installments { background: #4f7a28; border-color: #4f7a28; }
-.tpl .chip-share { cursor: pointer; font-family: inherit; }
-.tpl .chip-share:hover { background: rgba(255, 255, 255, 0.22); }
 
 /* Card de ingresso: descrição e regra da meia */
 .tpl .ticket-desc { font-size: 13px; color: var(--text-soft); line-height: 1.45; }

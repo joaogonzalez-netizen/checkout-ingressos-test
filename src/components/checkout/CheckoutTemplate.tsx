@@ -9,6 +9,7 @@ import { formatCpfCnpj, formatPhone, isValidCpfCnpj, isValidMobile, onlyDigits }
 import { readCookie, trackFunnel } from "./pixel-client";
 import type { TemplateData } from "./types";
 import { VslVideo } from "./VslVideo";
+import { HeroIcon } from "./icons";
 import { BuyCta, EventFooter, EventInfo, type BuyCtaInfo } from "./EventInfo";
 
 type Props = {
@@ -115,24 +116,29 @@ export function CheckoutTemplate({ data, mode = "live" }: Props) {
   const seatGridRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
 
-  // Primeira dobra: o header encolhe o quanto for preciso para data, horário e local caberem na tela.
-  // O CSS traz uma reserva aproximada (--fold-reserve); aqui ela vira a altura medida das faixas
-  // de aviso + nav + faixa do evento (que inclui o CTA de compra).
+  // Primeira dobra: a capa encolhe (sem cortar) o quanto for preciso para título, data, local e o botão de compra
+  // aparecerem na tela. O CSS traz reservas aproximadas (--fold-reserve); aqui viram alturas medidas.
+  // Desktop (lado a lado) só reserva avisos + nav; celular (empilhado) reserva também o bloco de informações.
   useEffect(() => {
     const root = rootRef.current;
     const nav = root?.querySelector<HTMLElement>("header.nav");
-    const strip = root?.querySelector<HTMLElement>(".event-strip");
-    if (!root || !nav || !strip) return;
+    const info = root?.querySelector<HTMLElement>(".event-hero-info");
+    if (!root || !nav || !info) return;
     const banners = [...root.querySelectorAll<HTMLElement>(".demo-banner, .preview-banner")];
-    const update = () =>
-      root.style.setProperty(
-        "--fold-reserve",
-        `${[nav, strip, ...banners].reduce((h, el) => h + el.offsetHeight, 0) + 12}px`,
-      );
+    const sideBySide = window.matchMedia("(min-width: 860px)");
+    const update = () => {
+      const chrome = [nav, ...banners].reduce((h, el) => h + el.offsetHeight, 0);
+      const reserve = sideBySide.matches ? chrome + 96 : chrome + info.offsetHeight + 72;
+      root.style.setProperty("--fold-reserve", `${reserve}px`);
+    };
     update();
     const ro = new ResizeObserver(update);
-    for (const el of [nav, strip, ...banners]) ro.observe(el);
-    return () => ro.disconnect();
+    for (const el of [nav, info, ...banners]) ro.observe(el);
+    sideBySide.addEventListener("change", update);
+    return () => {
+      ro.disconnect();
+      sideBySide.removeEventListener("change", update);
+    };
   }, []);
 
   useEffect(() => {
@@ -290,71 +296,82 @@ export function CheckoutTemplate({ data, mode = "live" }: Props) {
         </div>
       </header>
 
-      {data.cover && (
-        <div className="event-cover">
-          <div className="event-cover-bg" style={{ backgroundImage: `url(${data.cover.desktop})` }} aria-hidden />
-          <picture>
-            {data.cover.mobile && <source media="(max-width: 640px)" srcSet={data.cover.mobile} />}
-            <img src={data.cover.desktop} alt={`${data.artistName} — ${data.showName}`} />
-          </picture>
-        </div>
-      )}
-
-      <div className="event-strip">
-        <div className="event-strip-inner">
-          <div className="event-eyebrow">{buyCta.soldOut ? "Ingressos esgotados" : "Ingressos à venda"}</div>
-          <div className="event-title">{data.showName}</div>
-          <div className="event-chips">
-            {data.ageRatingLabel && (
-              <span className={`age-chip age-${data.ageRatingLabel === "Livre" ? "L" : data.ageRatingLabel.slice(0, 2)}`} title="Classificação indicativa">
-                {data.ageRatingLabel === "Livre" ? "L" : data.ageRatingLabel.slice(0, 2)}
-              </span>
-            )}
-            <span className="chip-soft">Evento presencial</span>
-            <span className="chip-installments">💳 Parcele em até 12x</span>
-            <button type="button" className="chip-share" onClick={share}>
-              {shared ? "Link copiado!" : "↗ Compartilhar"}
-            </button>
-          </div>
-          <div className="event-info">
-            <div className="event-info-item">
-              <span className="event-info-icon" aria-hidden>📅</span>
-              <div>
-                <strong>{data.longDateLabel}</strong>
-                {data.timeLabel && (
-                  <span>
-                    Início às {data.timeLabel}
-                    {data.endLabel && ` · término às ${data.endLabel}`}
-                    {data.doorsLabel && ` · portões às ${data.doorsLabel}`}
-                  </span>
-                )}
-              </div>
+      <section className="event-hero">
+        {data.cover && <div className="event-hero-bg" style={{ backgroundImage: `url(${data.cover.desktop})` }} aria-hidden />}
+        <div className="event-hero-inner">
+          {data.cover && (
+            <div className="event-hero-media">
+              <picture>
+                {data.cover.mobile && <source media="(max-width: 640px)" srcSet={data.cover.mobile} />}
+                <img src={data.cover.desktop} alt={`${data.artistName} — ${data.showName}`} />
+              </picture>
+              <button type="button" className="hero-share" onClick={share}>
+                <HeroIcon name="share" size={20} />
+                {shared ? "Link copiado!" : "Compartilhar"}
+              </button>
             </div>
-            <div className="event-info-item">
-              <span className="event-info-icon" aria-hidden>📍</span>
-              <div>
-                <strong>{data.venueName}</strong>
-                <span>
-                  {/* Não repete a cidade quando o endereço já traz ela. */}
-                  {data.venueAddress && data.venueAddress.toLowerCase().includes(data.city.toLowerCase())
-                    ? data.venueAddress
-                    : [data.venueAddress, `${data.city}/${data.state}`].filter(Boolean).join(" · ")}
+          )}
+          <div className="event-hero-info">
+            <h1 className="event-title">{data.showName}</h1>
+            <ul className="hero-facts">
+              <li>
+                <HeroIcon name="calendar" />
+                <div>
+                  <strong>{data.longDateLabel}</strong>
+                </div>
+              </li>
+              {data.timeLabel && (
+                <li>
+                  <HeroIcon name="clock" />
+                  <div>
+                    <strong>Início às {data.timeLabel}</strong>
+                    <span>
+                      {[data.doorsLabel && `portões às ${data.doorsLabel}`, data.endLabel && `término às ${data.endLabel}`]
+                        .filter(Boolean)
+                        .join(" · ") || "Horários referentes ao local do evento."}
+                    </span>
+                  </div>
+                </li>
+              )}
+              <li>
+                <HeroIcon name="pin" />
+                <div>
+                  <strong>
+                    {data.venueName}
+                    {" · "}
+                    <a href={data.mapUrl} target="_blank" rel="noreferrer">
+                      {/* Não repete a cidade quando o endereço já traz ela. */}
+                      {data.venueAddress && data.venueAddress.toLowerCase().includes(data.city.toLowerCase())
+                        ? data.venueAddress
+                        : [data.venueAddress, `${data.city}/${data.state}`].filter(Boolean).join(" · ")}
+                    </a>
+                  </strong>
+                </div>
+              </li>
+            </ul>
+            <div className="hero-badges">
+              {data.ageRatingLabel && (
+                <span className={`age-chip age-${data.ageRatingLabel === "Livre" ? "L" : data.ageRatingLabel.slice(0, 2)}`} title="Classificação indicativa">
+                  {data.ageRatingLabel === "Livre" ? "L" : data.ageRatingLabel.slice(0, 2)}
                 </span>
-              </div>
+              )}
+              <span className="chip-installments">
+                <HeroIcon name="card" size={18} /> Parcele em até 12x
+              </span>
             </div>
+            <BuyCta info={buyCta} className="strip-cta" />
           </div>
-          <BuyCta info={buyCta} className="strip-cta" />
         </div>
-      </div>
+      </section>
 
       <section className="vsl-intro">
         {/* Com vídeo (Reels 9:16): título, texto e CTA à esquerda, vídeo à direita; no celular o texto vem antes. */}
         <div className={`vsl-inner ${data.video ? "with-reels" : "no-video"}`}>
           <div className="vsl-copy">
             <div className="event-eyebrow">Não perca essa</div>
-            <h1 className="vsl-title">
+            <h2 className="vsl-title">
               <Headline text={data.vslHeadline} city={data.city} />
-            </h1>
+            </h2>
             {data.vslSubtitle && <p className="vsl-sub">{data.vslSubtitle}</p>}
             <button className="vsl-cta" type="button" onClick={goToCheckout}>
               {data.vslCtaLabel} ↓
