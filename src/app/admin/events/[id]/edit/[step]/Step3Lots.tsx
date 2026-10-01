@@ -90,7 +90,7 @@ export function Step3Lots({
               <b>{distributed}</b> de {limitNum || "—"} distribuídos nos lotes
             </div>
             <div className="bo-limit-bar">
-              <i style={{ width: `${limitNum ? Math.min(100, (distributed / limitNum) * 100) : 0}%` }} />
+              <i style={{ transform: `scaleX(${limitNum ? Math.min(1, distributed / limitNum) : 0})` }} />
             </div>
             <span className="bo-hint">
               {over

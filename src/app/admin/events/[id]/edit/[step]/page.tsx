@@ -18,6 +18,7 @@ import { Step3Lots } from "./Step3Lots";
 import { Step4Seats } from "./Step4Seats";
 import { Step5Pixel } from "./Step5Pixel";
 import { Step6Review } from "./Step6Review";
+import { PublicationCard } from "./PublicationCard";
 
 function isoLocal(d: Date | null) {
   return d ? `${toLocalDate(d)}T${toLocalTime(d)}` : "";
@@ -139,18 +140,20 @@ export default async function EditStep({ params }: PageProps<"/admin/events/[id]
 
   return (
     <>
-      <div className="bo-steps">
+      <nav className="bo-steps" aria-label="Etapas da configuração">
         {WIZARD_STEPS.filter((s) => s.step > 0).map((s) => (
           <Link
             key={s.step}
             href={`/admin/events/${id}/edit/${s.step}`}
+            aria-current={s.step === step ? "step" : undefined}
             className={`bo-step${s.step === step ? " current" : s.step <= event.wizardStep ? " done" : ""}`}
           >
             {s.step}. {s.label}
           </Link>
         ))}
-      </div>
+      </nav>
       {body}
+      {step === 6 && <PublicationCard eventId={id} status={event.status} archived={!!event.archivedAt} />}
     </>
   );
 }

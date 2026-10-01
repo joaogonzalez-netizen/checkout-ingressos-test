@@ -71,7 +71,7 @@ export function PasswordField({ name, label, context, allowGenerate, onChange }:
       )}
       <div className="bo-strength" aria-live="polite">
         <div className="bo-strength-bar">
-          <i style={{ width: `${(passed / checks.length) * 100}%` }} className={passed === checks.length ? "ok" : passed >= 5 ? "mid" : "low"} />
+          <i style={{ transform: `scaleX(${passed / checks.length})` }} className={passed === checks.length ? "ok" : passed >= 5 ? "mid" : "low"} />
         </div>
         <ul>
           {checks.map((c) => (

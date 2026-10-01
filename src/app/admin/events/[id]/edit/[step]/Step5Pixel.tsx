@@ -22,7 +22,7 @@ export function Step5Pixel({
     <>
       <StepForm action={action} eventId={eventId} step={5} hidden={{ pixelMode: mode }}>
         <div className="bo-card">
-          <h2>Rastreamento — Pixel do Meta</h2>
+          <h2>Pixel e rastreamento (Meta)</h2>
           <p className="muted small" style={{ marginTop: -6 }}>
             O sistema monta o snippet no &lt;head&gt; a partir do ID. Eventos: PageView, ViewContent, InitiateCheckout,
             AddPaymentInfo e Purchase (server-side, após o webhook da Asaas).

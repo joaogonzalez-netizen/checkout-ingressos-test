@@ -3,9 +3,11 @@ import { requireAdmin } from "@/lib/auth";
 import { env } from "@/lib/env";
 import { formatDateTime } from "@/lib/dates";
 import { NavLink } from "../../NavLink";
+import { Icon } from "../../components/Icon";
 import { EVENT_STATUS_LABEL } from "../labels";
 import { getEvent } from "./data";
 
+/** Um evento = um cabeçalho + 4 abas. Operar (visão geral, vendas, check-in) e configurar ficam em abas separadas. */
 export default async function EventLayout({ children, params }: LayoutProps<"/admin/events/[id]">) {
   await requireAdmin();
   const { id } = await params;
@@ -15,50 +17,44 @@ export default async function EventLayout({ children, params }: LayoutProps<"/ad
 
   return (
     <>
-      <div className="bo-event-head">
-        <div>
-          <Link href={`/admin/artists/${event.artistId}`} className="small">
-            {event.artist.name}
-          </Link>
-          <h1>
-            {event.showName ?? "Rascunho sem nome"} <span className={`bo-badge ${event.status}`}>{EVENT_STATUS_LABEL[event.status]}</span>
-            {event.archivedAt && (
-              <>
-                {" "}
-                <span className="bo-badge archived">Arquivado</span>
-              </>
-            )}
-          </h1>
-          <div className="muted small">
-            {[formatDateTime(event.startsAt), event.venueName, event.city && `${event.city}/${event.state}`].filter(Boolean).join(" · ") ||
-              "Dados do evento ainda não preenchidos"}
+      <header className="bo-event-head">
+        <div className="bo-event-top">
+          <div>
+            <Link href="/admin/events" className="bo-back">
+              <Icon name="arrow-left" size={15} /> Eventos
+            </Link>
+            <h1>
+              {event.showName ?? "Rascunho sem nome"} <span className={`bo-badge ${event.status}`}>{EVENT_STATUS_LABEL[event.status]}</span>
+              {event.archivedAt && (
+                <>
+                  {" "}
+                  <span className="bo-badge archived">Arquivado</span>
+                </>
+              )}
+            </h1>
+            <div className="muted small">
+              <Link href={`/admin/artists/${event.artistId}`}>{event.artist.name}</Link>
+              {" · "}
+              {[formatDateTime(event.startsAt), event.venueName, event.city && `${event.city}/${event.state}`].filter(Boolean).join(" · ") ||
+                "Dados do evento ainda não preenchidos"}
+            </div>
           </div>
           {publicUrl && event.status === "published" && (
-            <div className="small" style={{ marginTop: 6 }}>
-              <a href={publicUrl} target="_blank" rel="noreferrer">
-                {publicUrl}
-              </a>
-            </div>
+            <a href={publicUrl} target="_blank" rel="noreferrer" className="bo-btn bo-btn-sm bo-no-print">
+              Ver página <Icon name="external" size={14} />
+            </a>
           )}
         </div>
-        <div className="bo-actions">
-          <Link href={`${base}/edit/1`} className="bo-btn">
-            Editar evento
-          </Link>
-        </div>
-      </div>
-      <div className="bo-event-layout">
-        <nav className="bo-subnav">
+        <nav className="bo-tabs bo-event-tabs" aria-label="Seções do evento">
           <NavLink href={base} exact>
             Visão geral
           </NavLink>
-          <NavLink href={`${base}/edit`}>Editar (etapas)</NavLink>
-          <NavLink href={`${base}/orders`}>Participantes</NavLink>
-          <NavLink href={`${base}/checkin`}>Conferência</NavLink>
-          <span title="P2">Financeiro</span>
+          <NavLink href={`${base}/orders`}>Vendas</NavLink>
+          <NavLink href={`${base}/checkin`}>Check-in</NavLink>
+          <NavLink href={`${base}/edit`}>Configurar</NavLink>
         </nav>
-        <div style={{ minWidth: 0 }}>{children}</div>
-      </div>
+      </header>
+      <div style={{ minWidth: 0 }}>{children}</div>
     </>
   );
 }

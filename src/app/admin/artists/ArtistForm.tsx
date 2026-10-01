@@ -73,7 +73,7 @@ export function ArtistForm({ initial }: { initial: ArtistFormValues }) {
       <PaletteEditor initial={initial.colors} isNew={!initial.id} />
 
       <div className="bo-card">
-        <h2>Rastreamento (Meta)</h2>
+        <h2>Pixel e rastreamento (Meta)</h2>
         <div className="bo-form-grid">
           <label className="bo-field">
             <span>Pixel ID</span>

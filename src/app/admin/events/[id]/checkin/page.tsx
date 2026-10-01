@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { env } from "@/lib/env";
 import { formatPhone } from "@/lib/documents";
 import type { Prisma } from "@/generated/prisma/client";
+import { Icon } from "../../../components/Icon";
 import { getEvent } from "../data";
 import { checkInFromList, generateTestAttendees, undoFromList, validateEntry } from "./actions";
 import { ValidateBox } from "./ValidateBox";
@@ -67,10 +68,10 @@ export default async function CheckinPage({ params, searchParams }: PageProps<"/
     <>
       <nav className="bo-tabs" aria-label="Modo de check-in">
         <Link href={base} aria-current={!codeMode ? "page" : undefined}>
-          Check-in online
+          Lista
         </Link>
         <Link href={`${base}?modo=codigo`} aria-current={codeMode ? "page" : undefined}>
-          Check-in por código ou QR
+          Código / QR
         </Link>
       </nav>
 
@@ -87,7 +88,7 @@ export default async function CheckinPage({ params, searchParams }: PageProps<"/
       ) : (
         <div className="bo-card bo-checkin">
           <div className="bo-checkin-title">
-            <h2>Check-in participantes</h2>
+            <h2>Lista de participantes</h2>
             <span className="bo-print-only">
               {event.showName} · {event.venueName}
             </span>
@@ -95,11 +96,11 @@ export default async function CheckinPage({ params, searchParams }: PageProps<"/
 
           <div className="bo-checkin-bar">
             <form className="bo-search" role="search">
-              <span aria-hidden>🔍</span>
+              <Icon name="search" size={18} />
               <input name="q" placeholder="Nome, e-mail ou telefone" defaultValue={q} autoComplete="off" autoFocus />
               {q && (
                 <Link href={base} aria-label="Limpar busca">
-                  ✕
+                  <Icon name="close" size={16} />
                 </Link>
               )}
             </form>

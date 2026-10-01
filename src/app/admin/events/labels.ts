@@ -29,6 +29,6 @@ export const WIZARD_STEPS = [
   { step: 2, label: "Página" },
   { step: 3, label: "Ingressos" },
   { step: 4, label: "Lugares" },
-  { step: 5, label: "Rastreamento" },
-  { step: 6, label: "Revisão e publicação" },
+  { step: 5, label: "Pixel e rastreamento" },
+  { step: 6, label: "Publicação" },
 ] as const;

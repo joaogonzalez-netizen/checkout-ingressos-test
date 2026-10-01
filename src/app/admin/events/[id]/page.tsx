@@ -2,10 +2,9 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { formatBRL } from "@/lib/money";
 import { canPublish, eventChecklist } from "@/lib/event-checklist";
-import { setEventStatus } from "../actions";
 import { LOT_CATEGORY_LABEL } from "../labels";
+import { env } from "@/lib/env";
 import { getEvent } from "./data";
-import { ArchiveButton } from "../ArchiveButton";
 
 export default async function EventOverview({ params, searchParams }: PageProps<"/admin/events/[id]">) {
   const { id } = await params;
@@ -21,6 +20,8 @@ export default async function EventOverview({ params, searchParams }: PageProps<
   ]);
   const checklist = eventChecklist(event);
   const ready = canPublish(checklist);
+  const missing = checklist.filter((c) => !c.done).length;
+  const nextStep = Math.min(Math.max(event.wizardStep + 1, 1), 6);
   const seatsAvailable = event.seats.filter((s) => s.status === "available").length;
 
   return (
@@ -28,7 +29,7 @@ export default async function EventOverview({ params, searchParams }: PageProps<
       {published && <p className="bo-success" style={{ marginBottom: 16 }}>Evento publicado! O link público já está no ar.</p>}
       {event.archivedAt && (
         <p className="bo-warn" style={{ marginBottom: 16 }}>
-          Evento arquivado: não aparece na lista de eventos ativos. Pedidos e ingressos continuam guardados.
+          Evento arquivado: não aparece na lista de eventos ativos. Para desarquivar, vá em Configurar → Publicação.
         </p>
       )}
       {conflicts.length > 0 && (
@@ -37,6 +38,48 @@ export default async function EventOverview({ params, searchParams }: PageProps<
           manualmente: {conflicts.map((c) => c.entityId.slice(-8).toUpperCase()).join(", ")}.
         </p>
       )}
+
+      <section className="bo-status-strip" aria-label="Situação do evento">
+        {event.status === "draft" && (
+          <>
+            <p>
+              <b>Rascunho</b>
+              <span className="muted">
+                {" · "}
+                {ready ? "tudo pronto para publicar" : `faltam ${missing} ${missing === 1 ? "item obrigatório" : "itens obrigatórios"} para publicar`}
+              </span>
+            </p>
+            <Link href={`/admin/events/${id}/edit/${ready ? 6 : nextStep}`} className="bo-btn bo-btn-primary">
+              {ready ? "Revisar e publicar" : "Continuar configuração"}
+            </Link>
+          </>
+        )}
+        {event.status === "published" && (
+          <p>
+            <b>No ar</b>
+            <span className="muted"> · vendas abertas</span>
+            {event.slug && (
+              <>
+                {" · "}
+                <a href={`${env.APP_URL}/e/${event.slug}`} target="_blank" rel="noreferrer">
+                  {env.APP_URL.replace(/^https?:\/\//, "")}/e/{event.slug}
+                </a>
+              </>
+            )}
+          </p>
+        )}
+        {event.status === "closed" && (
+          <>
+            <p>
+              <b>Vendas encerradas</b>
+              <span className="muted"> · a página mostra o aviso de encerramento</span>
+            </p>
+            <Link href={`/admin/events/${id}/edit/6`} className="bo-btn">
+              Gerenciar publicação
+            </Link>
+          </>
+        )}
+      </section>
 
       <div className="bo-stats">
         <div className="bo-stat">
@@ -94,40 +137,6 @@ export default async function EventOverview({ params, searchParams }: PageProps<
               ))}
             </tbody>
           </table>
-        )}
-      </div>
-
-      <div className="bo-card">
-        <div className="bo-page-head" style={{ marginBottom: 8 }}>
-          <h2 style={{ margin: 0 }}>Publicação</h2>
-          <ArchiveButton eventId={id} archived={!!event.archivedAt} published={event.status === "published"} small />
-        </div>
-        {event.status === "draft" && (
-          <div className="bo-actions">
-            <span className="muted">{ready ? "Tudo pronto para publicar." : "Ainda faltam itens obrigatórios."}</span>
-            <Link href={`/admin/events/${id}/edit/6`} className="bo-btn bo-btn-primary">
-              Revisar e publicar
-            </Link>
-          </div>
-        )}
-        {event.status === "published" && (
-          <div className="bo-actions">
-            <form action={setEventStatus.bind(null, id, "closed")}>
-              <button className="bo-btn">Encerrar vendas</button>
-            </form>
-            <form action={setEventStatus.bind(null, id, "draft")}>
-              <button className="bo-btn bo-btn-danger">Despublicar (tira a página do ar)</button>
-            </form>
-            <span className="muted small">Os pedidos nunca são apagados.</span>
-          </div>
-        )}
-        {event.status === "closed" && (
-          <div className="bo-actions">
-            <span className="muted">Vendas encerradas. A página mostra o aviso de encerramento.</span>
-            <form action={setEventStatus.bind(null, id, "published")}>
-              <button className="bo-btn">Reabrir vendas</button>
-            </form>
-          </div>
         )}
       </div>
     </>

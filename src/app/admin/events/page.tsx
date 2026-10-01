@@ -43,7 +43,7 @@ export default async function EventsPage({ searchParams }: PageProps<"/admin/eve
       <div className="bo-card">
         {events.length === 0 ? (
           <div className="bo-empty">
-            {archivedTab ? "Nenhum evento arquivado." : "Nenhum evento ativo. Comece cadastrando um artista."}
+            {archivedTab ? "Nenhum evento arquivado." : <>Nenhum evento ativo. <Link href="/admin/events/new">Criar o primeiro evento</Link>.</>}
           </div>
         ) : (
           <div className="bo-table-wrap">
@@ -65,7 +65,7 @@ export default async function EventsPage({ searchParams }: PageProps<"/admin/eve
                   return (
                     <tr key={e.id}>
                       <td>
-                        <Link href={`/admin/events/${e.id}`}>
+                        <Link href={e.status === "draft" && !e.archivedAt ? `/admin/events/${e.id}/edit` : `/admin/events/${e.id}`}>
                           <b>{e.showName ?? "Rascunho sem nome"}</b>
                         </Link>
                         <div className="small muted">
