@@ -84,104 +84,104 @@ enum MediaKind {
 }
 
 model User {
-  id           String     @id @default(cuid())
-  name         String
-  email        String     @unique
-  passwordHash String     @map("password_hash")
+  id                 String     @id @default(cuid())
+  name               String
+  email              String     @unique
+  passwordHash       String     @map("password_hash")
   // v1: só o perfil admin é usado; os demais já existem para BO-01.
-  role         Role       @default(admin)
+  role               Role       @default(admin)
   // Desativado não entra e perde as sessões abertas.
-  active             Boolean   @default(true)
+  active             Boolean    @default(true)
   // Senha definida por outra pessoa (temporária): obriga a troca no primeiro acesso.
-  mustChangePassword Boolean   @default(false) @map("must_change_password")
+  mustChangePassword Boolean    @default(false) @map("must_change_password")
   // Vai no token de sessão; incrementar derruba todas as sessões do usuário.
-  sessionVersion     Int       @default(0) @map("session_version")
-  failedLoginCount   Int       @default(0) @map("failed_login_count")
-  lockedUntil        DateTime? @map("locked_until")
-  lastLoginAt        DateTime? @map("last_login_at")
-  passwordChangedAt  DateTime? @map("password_changed_at")
-  createdById        String?   @map("created_by_id")
-  createdAt    DateTime   @default(now()) @map("created_at")
-  auditLogs    AuditLog[]
+  sessionVersion     Int        @default(0) @map("session_version")
+  failedLoginCount   Int        @default(0) @map("failed_login_count")
+  lockedUntil        DateTime?  @map("locked_until")
+  lastLoginAt        DateTime?  @map("last_login_at")
+  passwordChangedAt  DateTime?  @map("password_changed_at")
+  createdById        String?    @map("created_by_id")
+  createdAt          DateTime   @default(now()) @map("created_at")
+  auditLogs          AuditLog[]
 
   @@map("users")
 }
 
 model Artist {
-  id                 String   @id @default(cuid())
-  name               String
-  slug               String   @unique
-  logoUrl            String?  @map("logo_url")
-  logoKey            String?  @map("logo_key")
+  id                    String    @id @default(cuid())
+  name                  String
+  slug                  String    @unique
+  logoUrl               String?   @map("logo_url")
+  logoKey               String?   @map("logo_key")
   // { primary, secondary, accent, background } em hex
-  colors             Json
-  backLinkUrl        String?  @map("back_link_url")
-  metaPixelId        String?  @map("meta_pixel_id")
+  colors                Json
+  backLinkUrl           String?   @map("back_link_url")
+  metaPixelId           String?   @map("meta_pixel_id")
   // Criptografado com AES-256-GCM (ENCRYPTION_KEY). Nunca volta para o browser.
-  metaCapiTokenEnc   String?  @map("meta_capi_token")
-  defaultShowName    String?  @map("default_show_name")
-  defaultVslSubtitle String?  @map("default_vsl_subtitle")
-  defaultOgImageUrl  String?  @map("default_og_image_url")
-  defaultOgImageKey  String?  @map("default_og_image_key")
+  metaCapiTokenEnc      String?   @map("meta_capi_token")
+  defaultShowName       String?   @map("default_show_name")
+  defaultVslSubtitle    String?   @map("default_vsl_subtitle")
+  defaultOgImageUrl     String?   @map("default_og_image_url")
+  defaultOgImageKey     String?   @map("default_og_image_key")
   // Header padrão do site, herdado pelos eventos que não enviarem o próprio.
-  defaultCoverUrl       String? @map("default_cover_url")
-  defaultCoverKey       String? @map("default_cover_key")
-  defaultCoverMobileUrl String? @map("default_cover_mobile_url")
-  defaultCoverMobileKey String? @map("default_cover_mobile_key")
+  defaultCoverUrl       String?   @map("default_cover_url")
+  defaultCoverKey       String?   @map("default_cover_key")
+  defaultCoverMobileUrl String?   @map("default_cover_mobile_url")
+  defaultCoverMobileKey String?   @map("default_cover_mobile_key")
   // Desativado: some das listas e não recebe eventos novos. Eventos existentes continuam.
-  archivedAt         DateTime? @map("archived_at")
-  createdAt          DateTime @default(now()) @map("created_at")
-  updatedAt          DateTime @updatedAt @map("updated_at")
-  events             Event[]
+  archivedAt            DateTime? @map("archived_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+  events                Event[]
 
   @@map("artists")
 }
 
 model Event {
-  id                     String       @id @default(cuid())
-  artistId               String       @map("artist_id")
-  artist                 Artist       @relation(fields: [artistId], references: [id])
-  showName               String?      @map("show_name")
-  city                   String?
-  state                  String?
-  venueName              String?      @map("venue_name")
-  venueAddress           String?      @map("venue_address")
-  startsAt               DateTime?    @map("starts_at")
-  endsAt                 DateTime?    @map("ends_at")
-  doorsOpenAt            DateTime?    @map("doors_open_at")
-  slug                   String?      @unique
-  status                 EventStatus  @default(draft)
-  vslHeadline            String?      @map("vsl_headline")
-  vslSubtitle            String?      @map("vsl_subtitle")
-  vslCtaLabel            String?      @map("vsl_cta_label")
+  id                    String          @id @default(cuid())
+  artistId              String          @map("artist_id")
+  artist                Artist          @relation(fields: [artistId], references: [id])
+  showName              String?         @map("show_name")
+  city                  String?
+  state                 String?
+  venueName             String?         @map("venue_name")
+  venueAddress          String?         @map("venue_address")
+  startsAt              DateTime?       @map("starts_at")
+  endsAt                DateTime?       @map("ends_at")
+  doorsOpenAt           DateTime?       @map("doors_open_at")
+  slug                  String?         @unique
+  status                EventStatus     @default(draft)
+  vslHeadline           String?         @map("vsl_headline")
+  vslSubtitle           String?         @map("vsl_subtitle")
+  vslCtaLabel           String?         @map("vsl_cta_label")
   // Descrição longa ("Descrição do evento") e regras de acesso ("Informações gerais").
-  description            String?
-  accessRules            String?      @map("access_rules")
+  description           String?
+  accessRules           String?         @map("access_rules")
   // Classificação indicativa: "L", "10", "12", "14", "16" ou "18"; nota opcional (ex.: menores com responsável).
-  ageRating              String?      @map("age_rating")
-  ageRatingNote          String?      @map("age_rating_note")
-  ogImageUrl             String?      @map("og_image_url")
-  ogImageKey             String?      @map("og_image_key")
+  ageRating             String?         @map("age_rating")
+  ageRatingNote         String?         @map("age_rating_note")
+  ogImageUrl            String?         @map("og_image_url")
+  ogImageKey            String?         @map("og_image_key")
   // Limite total de ingressos do evento: a soma das quantidades dos lotes não pode passar dele.
-  ticketLimit            Int?         @map("ticket_limit")
-  seatingMode            SeatingMode? @map("seating_mode")
-  seatRows               Int?         @map("seat_rows")
-  seatsPerRow            Int?         @map("seats_per_row")
-  metaPixelOverride      String?      @map("meta_pixel_override")
-  metaCapiTokenOverride  String?      @map("meta_capi_token_override")
+  ticketLimit           Int?            @map("ticket_limit")
+  seatingMode           SeatingMode?    @map("seating_mode")
+  seatRows              Int?            @map("seat_rows")
+  seatsPerRow           Int?            @map("seats_per_row")
+  metaPixelOverride     String?         @map("meta_pixel_override")
+  metaCapiTokenOverride String?         @map("meta_capi_token_override")
   // Última etapa do wizard concluída (0–6), para retomar o rascunho.
-  wizardStep             Int          @default(0) @map("wizard_step")
-  publishedAt            DateTime?    @map("published_at")
+  wizardStep            Int             @default(0) @map("wizard_step")
+  publishedAt           DateTime?       @map("published_at")
   // Arquivado: sai da lista principal (aba "Arquivados"). Pedidos e ingressos continuam guardados.
-  archivedAt             DateTime?    @map("archived_at")
-  createdAt              DateTime     @default(now()) @map("created_at")
-  updatedAt              DateTime     @updatedAt @map("updated_at")
-  lots                   TicketLot[]
-  seats                  Seat[]
-  orders                 Order[]
-  tickets                Ticket[]
-  media                  EventMedia[]
-  checkinAccess          CheckinAccess[]
+  archivedAt            DateTime?       @map("archived_at")
+  createdAt             DateTime        @default(now()) @map("created_at")
+  updatedAt             DateTime        @updatedAt @map("updated_at")
+  lots                  TicketLot[]
+  seats                 Seat[]
+  orders                Order[]
+  tickets               Ticket[]
+  media                 EventMedia[]
+  checkinAccess         CheckinAccess[]
 
   @@map("events")
 }
@@ -234,66 +234,66 @@ model TicketLot {
 }
 
 model Seat {
-  id        String     @id @default(cuid())
-  eventId   String     @map("event_id")
-  event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  row       String
-  number    Int
-  status    SeatStatus @default(available)
+  id      String     @id @default(cuid())
+  eventId String     @map("event_id")
+  event   Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  row     String
+  number  Int
+  status  SeatStatus @default(available)
   // Pedido que segura (held) ou comprou (sold) a poltrona.
-  orderId   String?    @map("order_id")
-  orders    Order[]
-  tickets   Ticket[]
+  orderId String?    @map("order_id")
+  orders  Order[]
+  tickets Ticket[]
 
   @@unique([eventId, row, number])
   @@map("seats")
 }
 
 model Order {
-  id               String        @id @default(cuid())
+  id                 String        @id @default(cuid())
   // Token aleatório exigido para ver o pedido sem login (/pedido/[id]?t=...).
-  accessToken      String        @map("access_token")
-  eventId          String        @map("event_id")
-  event            Event         @relation(fields: [eventId], references: [id])
+  accessToken        String        @map("access_token")
+  eventId            String        @map("event_id")
+  event              Event         @relation(fields: [eventId], references: [id])
   // Legado (pedidos de 1 ingresso). A fonte da verdade são os itens (OrderItem).
-  lotId            String?       @map("lot_id")
-  lot              TicketLot?    @relation(fields: [lotId], references: [id])
-  seatId           String?       @map("seat_id")
-  seat             Seat?         @relation(fields: [seatId], references: [id])
-  status           OrderStatus   @default(pending)
-  paymentMethod    PaymentMethod @map("payment_method")
-  installments     Int           @default(1)
-  buyerName        String        @map("buyer_name")
-  buyerEmail       String        @map("buyer_email")
-  buyerCpfCnpj     String        @map("buyer_cpf_cnpj")
+  lotId              String?       @map("lot_id")
+  lot                TicketLot?    @relation(fields: [lotId], references: [id])
+  seatId             String?       @map("seat_id")
+  seat               Seat?         @relation(fields: [seatId], references: [id])
+  status             OrderStatus   @default(pending)
+  paymentMethod      PaymentMethod @map("payment_method")
+  installments       Int           @default(1)
+  buyerName          String        @map("buyer_name")
+  buyerEmail         String        @map("buyer_email")
+  buyerCpfCnpj       String        @map("buyer_cpf_cnpj")
   // Celular com DDD, só dígitos. Busca no check-in e entrega por WhatsApp (Fase 2). Nulo em pedidos antigos.
-  buyerPhone       String?       @map("buyer_phone")
-  ticketCents      Int           @map("ticket_cents")
-  feeCents         Int           @map("fee_cents")
-  totalCents       Int           @map("total_cents")
-  asaasCustomerId  String?       @map("asaas_customer_id")
+  buyerPhone         String?       @map("buyer_phone")
+  ticketCents        Int           @map("ticket_cents")
+  feeCents           Int           @map("fee_cents")
+  totalCents         Int           @map("total_cents")
+  asaasCustomerId    String?       @map("asaas_customer_id")
   // Id da cobrança na Asaas: conciliação com repasse/antecipação.
-  asaasPaymentId   String?       @unique @map("asaas_payment_id")
-  invoiceUrl       String?       @map("invoice_url")
-  pixPayload       String?       @map("pix_payload")
-  pixQrImage       String?       @map("pix_qr_image")
-  holdExpiresAt    DateTime      @map("hold_expires_at")
-  paidAt           DateTime?     @map("paid_at")
-  acceptedTermsAt  DateTime      @map("accepted_terms_at")
+  asaasPaymentId     String?       @unique @map("asaas_payment_id")
+  invoiceUrl         String?       @map("invoice_url")
+  pixPayload         String?       @map("pix_payload")
+  pixQrImage         String?       @map("pix_qr_image")
+  holdExpiresAt      DateTime      @map("hold_expires_at")
+  paidAt             DateTime?     @map("paid_at")
+  acceptedTermsAt    DateTime      @map("accepted_terms_at")
   // Opt-in de marketing (LGPD): opcional, desmarcado por padrão.
-  marketingOptIn   Boolean       @default(false) @map("marketing_opt_in")
+  marketingOptIn     Boolean       @default(false) @map("marketing_opt_in")
   // Dados para a Conversions API (deduplicação e match).
-  fbp              String?
-  fbc              String?
-  clientIp         String?       @map("client_ip")
-  userAgent        String?       @map("user_agent")
-  sourceUrl        String?       @map("source_url")
-  capiPurchaseSentAt DateTime?   @map("capi_purchase_sent_at")
-  lastReconciledAt DateTime?     @map("last_reconciled_at")
-  createdAt        DateTime      @default(now()) @map("created_at")
-  updatedAt        DateTime      @updatedAt @map("updated_at")
-  tickets          Ticket[]
-  items            OrderItem[]
+  fbp                String?
+  fbc                String?
+  clientIp           String?       @map("client_ip")
+  userAgent          String?       @map("user_agent")
+  sourceUrl          String?       @map("source_url")
+  capiPurchaseSentAt DateTime?     @map("capi_purchase_sent_at")
+  lastReconciledAt   DateTime?     @map("last_reconciled_at")
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
+  tickets            Ticket[]
+  items              OrderItem[]
 
   @@index([eventId, status])
   @@index([status, holdExpiresAt])
@@ -302,15 +302,15 @@ model Order {
 
 // Uma linha por lote no pedido (ex.: 2x Inteira + 1x Meia). Cada unidade vira um Ticket.
 model OrderItem {
-  id         String    @id @default(cuid())
-  orderId    String    @map("order_id")
-  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  lotId      String    @map("lot_id")
-  lot        TicketLot @relation(fields: [lotId], references: [id])
-  quantity   Int
-  unitCents  Int       @map("unit_cents")
+  id        String    @id @default(cuid())
+  orderId   String    @map("order_id")
+  order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  lotId     String    @map("lot_id")
+  lot       TicketLot @relation(fields: [lotId], references: [id])
+  quantity  Int
+  unitCents Int       @map("unit_cents")
   // Taxa de serviço por unidade.
-  feeCents   Int       @map("fee_cents")
+  feeCents  Int       @map("fee_cents")
 
   @@unique([orderId, lotId])
   @@map("order_items")
@@ -342,14 +342,19 @@ model Ticket {
 }
 
 // Pronto para BO-10 (Fase 3).
+/// Link de conferência da portaria: /conferencia/<token> + PIN de 6 números. Um link ativo por evento.
 model CheckinAccess {
-  id        String    @id @default(cuid())
-  eventId   String    @map("event_id")
-  event     Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  pinHash   String    @map("pin_hash")
-  createdBy String    @map("created_by")
-  revokedAt DateTime? @map("revoked_at")
-  createdAt DateTime  @default(now()) @map("created_at")
+  id             String    @id @default(cuid())
+  eventId        String    @map("event_id")
+  event          Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  /// Parte secreta do endereço do link.
+  token          String    @unique
+  pinHash        String    @map("pin_hash")
+  failedAttempts Int       @default(0) @map("failed_attempts")
+  lockedUntil    DateTime? @map("locked_until")
+  createdBy      String    @map("created_by")
+  revokedAt      DateTime? @map("revoked_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
 
   @@map("checkin_access")
 }

@@ -2,11 +2,12 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { env } from "@/lib/env";
 import { formatPhone } from "@/lib/documents";
-import type { Prisma } from "@/generated/prisma/client";
 import { Icon } from "../../../components/Icon";
+import { ticketSearchWhere } from "@/lib/checkin-search";
 import { getEvent } from "../data";
 import { checkInFromList, generateTestAttendees, undoFromList, validateEntry } from "./actions";
 import { ValidateBox } from "./ValidateBox";
+import { DoorLinkCard } from "./DoorLinkCard";
 import { CopyButton } from "./CopyButton";
 import { PrintButton } from "./PrintButton";
 
@@ -14,33 +15,6 @@ const METHOD_LABEL = { qr: "QR", code: "código", manual: "manual", list: "lista
 
 function time(d: Date) {
   return d.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
-}
-
-const ACCENTED = "áàâãäéèêëíìîïóòôõöúùûüç";
-const PLAIN = "aaaaaeeeeiiiiooooouuuuc";
-const unaccent = (v: string) => [...v.toLowerCase()].map((c) => PLAIN[ACCENTED.indexOf(c)] ?? c).join("");
-/** % e _ são curingas no LIKE: escapa para buscar o caractere literal. */
-const likeLiteral = (v: string) => v.replace(/[\\%_]/g, (c) => `\\${c}`);
-
-/** Busca única: nome (sem diferenciar acento), e-mail ou telefone; também código do ingresso ou nº do pedido. */
-async function searchWhere(eventId: string, q: string): Promise<Prisma.TicketWhereInput> {
-  if (!q) return {};
-  const digits = q.replace(/\D/g, "");
-  // Na portaria ninguém digita acento: "natalia" precisa achar "Natália". SQL próprio porque o
-  // "contains" do Prisma não escapa % e _ (buscar "%" traria todo mundo).
-  const pattern = `%${likeLiteral(unaccent(q))}%`;
-  const byText = await db.$queryRaw<{ id: string }[]>`
-    SELECT t.id FROM tickets t JOIN orders o ON o.id = t.order_id
-    WHERE t.event_id = ${eventId}
-      AND (translate(lower(o.buyer_name), ${ACCENTED}, ${PLAIN}) LIKE ${pattern} OR lower(o.buyer_email) LIKE ${pattern})`;
-  return {
-    OR: [
-      { id: { in: byText.map((r) => r.id) } },
-      ...(digits.length >= 4 ? [{ order: { buyerPhone: { contains: digits } } }] : []),
-      { code: q.toUpperCase().replace(/\s/g, "") },
-      ...(/^[a-z0-9]{4,}$/i.test(q) ? [{ orderId: { endsWith: q.toLowerCase() } }] : []),
-    ],
-  };
 }
 
 export default async function CheckinPage({ params, searchParams }: PageProps<"/admin/events/[id]/checkin">) {
@@ -55,7 +29,7 @@ export default async function CheckinPage({ params, searchParams }: PageProps<"/
     codeMode
       ? Promise.resolve([])
       : db.ticket.findMany({
-          where: { eventId: id, status: { not: "canceled" }, ...(await searchWhere(id, q)) },
+          where: { eventId: id, status: { not: "canceled" }, ...(await ticketSearchWhere(id, q)) },
           include: { order: true, lot: true, seat: true },
           orderBy: [{ order: { buyerName: "asc" } }, { code: "asc" }],
           take: 2000,
@@ -66,6 +40,7 @@ export default async function CheckinPage({ params, searchParams }: PageProps<"/
 
   return (
     <>
+      <DoorLinkCard eventId={id} event={event} />
       <nav className="bo-tabs" aria-label="Modo de check-in">
         <Link href={base} aria-current={!codeMode ? "page" : undefined}>
           Lista

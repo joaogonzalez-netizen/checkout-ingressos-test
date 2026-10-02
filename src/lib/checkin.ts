@@ -34,7 +34,8 @@ export async function checkIn(input: {
   ticketId: string;
   method: ValidationMethod;
   usedBy: string;
-  userId: string;
+  /** null = equipe da portaria (entrou pelo link com PIN, sem conta de admin). */
+  userId: string | null;
   reason?: string;
 }): Promise<CheckinResult> {
   const updated = await db.ticket.updateMany({

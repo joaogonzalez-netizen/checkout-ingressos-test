@@ -56,7 +56,7 @@ export function ValidateBox({ action }: { action: (prev: ValidateState, form: Fo
         </div>
       )}
       <p className="bo-hint" style={{ marginTop: 10 }}>
-        O leitor de QR por câmera é o webapp do celular (Fase 3). Aqui dá para digitar o código ou usar um leitor USB, que &quot;digita&quot; o QR e aperta Enter.
+        Para a equipe da porta, use o link da portaria (bloco acima): lê o QR pela câmera do celular. Aqui dá para digitar o código ou usar um leitor USB, que &quot;digita&quot; o QR e aperta Enter.
       </p>
     </div>
   );
