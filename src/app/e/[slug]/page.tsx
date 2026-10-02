@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: PageProps<"/e/[slug]">): Prom
   if (!event || event.status !== "published") return {};
   const title = `Finalizar compra — ${event.artist.name} · ${event.showName}`;
   const description = `${event.city}/${event.state} · ${event.venueName} · ${formatDate(event.startsAt)}`;
-  const image = event.ogImageUrl ?? event.artist.defaultOgImageUrl;
+  const image = event.ogImageUrl;
   return {
     title,
     description,

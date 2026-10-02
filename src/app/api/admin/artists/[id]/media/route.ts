@@ -7,16 +7,13 @@ import { deleteObject, putObject } from "@/lib/storage";
 import { randomToken } from "@/lib/crypto";
 import type { ImageKind } from "@/lib/media-rules";
 
-// Imagens do artista: logo e os padrões herdados pelos eventos (header e og:image).
+// O artista só tem o logo (a marca). Header, vídeo e og:image são de cada evento.
 const COLUMNS = {
   logo: { url: "logoUrl", key: "logoKey" },
-  cover: { url: "defaultCoverUrl", key: "defaultCoverKey" },
-  cover_mobile: { url: "defaultCoverMobileUrl", key: "defaultCoverMobileKey" },
-  og_image: { url: "defaultOgImageUrl", key: "defaultOgImageKey" },
-} as const satisfies Record<ImageKind, { url: string; key: string }>;
+} as const;
 
-function isKind(v: string | null): v is ImageKind {
-  return !!v && v in COLUMNS;
+function isKind(v: string | null): v is Extract<ImageKind, "logo"> {
+  return v === "logo";
 }
 
 export async function POST(req: NextRequest, ctx: RouteContext<"/api/admin/artists/[id]/media">) {

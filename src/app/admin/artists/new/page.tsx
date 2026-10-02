@@ -24,7 +24,7 @@ export default async function NewArtistPage() {
           name: "",
           slug: "",
           backLinkUrl: "",
-          images: { logo: null, cover: null, cover_mobile: null, og_image: null },
+          images: { logo: null },
           colors: suggestPalette(DEFAULT_PALETTE.primary),
           metaPixelId: "",
           hasCapiToken: false,

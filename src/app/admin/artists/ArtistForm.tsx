@@ -12,7 +12,7 @@ export type ArtistFormValues = {
   name: string;
   slug: string;
   backLinkUrl: string;
-  images: { logo: string | null; cover: string | null; cover_mobile: string | null; og_image: string | null };
+  images: { logo: string | null };
   colors: Palette;
   metaPixelId: string;
   hasCapiToken: boolean;
@@ -27,7 +27,7 @@ export function ArtistForm({ initial }: { initial: ArtistFormValues }) {
   const [slugTouched, setSlugTouched] = useState(!!initial.id);
   // Imagens sobem direto para o storage, então o artista precisa existir antes.
   const endpoint = initial.id ? `/api/admin/artists/${initial.id}/media` : "";
-  const disabledReason = initial.id ? undefined : "Cadastre o artista primeiro; depois as imagens podem ser enviadas aqui.";
+  const disabledReason = initial.id ? undefined : "Cadastre o artista primeiro; depois o logo pode ser enviado aqui.";
 
   return (
     <form action={action} className="bo-form">
@@ -110,12 +110,10 @@ export function ArtistForm({ initial }: { initial: ArtistFormValues }) {
             <textarea name="defaultVslSubtitle" rows={3} defaultValue={initial.defaultVslSubtitle} />
           </label>
         </div>
-        <p className="bo-hint" style={{ margin: "16px 0 10px" }}>
-          Imagens herdadas por todos os eventos do artista. Cada evento pode enviar as próprias na etapa &quot;Página&quot;.
+        <p className="bo-hint" style={{ margin: "16px 0 0" }}>
+          As imagens da página (header, vídeo e imagem de compartilhamento) são de cada evento, na etapa &quot;Página&quot;. Aqui fica só o
+          logo, que é a marca do artista.
         </p>
-        <ImageUpload endpoint={endpoint} kind="cover" currentUrl={initial.images.cover} disabledReason={disabledReason} />
-        <ImageUpload endpoint={endpoint} kind="cover_mobile" currentUrl={initial.images.cover_mobile} disabledReason={disabledReason} />
-        <ImageUpload endpoint={endpoint} kind="og_image" currentUrl={initial.images.og_image} disabledReason={disabledReason} />
       </div>
 
       {state.error && <p className="bo-error">{state.error}</p>}

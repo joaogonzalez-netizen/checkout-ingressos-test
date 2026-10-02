@@ -15,7 +15,6 @@ type Media = {
   ogImage: string | null;
   video: { url: string; posterUrl: string | null; width: number; height: number; duration: number } | null;
 };
-type ArtistImages = { name: string; cover: string | null; coverMobile: string | null; ogImage: string | null };
 
 export function Step2Page({
   eventId,
@@ -23,7 +22,6 @@ export function Step2Page({
   base,
   initial,
   media,
-  artist,
   directVideoUpload,
 }: {
   eventId: string;
@@ -32,12 +30,8 @@ export function Step2Page({
   base: TemplateData;
   initial: Values;
   media: Media;
-  artist: ArtistImages;
 }) {
   const endpoint = `/api/admin/events/${eventId}/media`;
-  // O par do header é herdado junto: só mostra o do artista se o evento não tiver nenhuma das duas.
-  const ownCover = !!(media.cover || media.coverMobile);
-  const inherit = (url: string | null) => (!ownCover && url ? { url, label: artist.name } : null);
   const [v, setV] = useState(initial);
   const set = (k: keyof Values) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setV((s) => ({ ...s, [k]: e.target.value }));
 
@@ -81,17 +75,12 @@ export function Step2Page({
         <div className="bo-card">
           <h2>Imagens e vídeo</h2>
           <p className="bo-hint" style={{ marginTop: -6, marginBottom: 12 }}>
-            Sobem na hora, sem precisar clicar em Salvar. Sem imagem própria, o evento usa as do cadastro de {artist.name}.
+            Sobem na hora, sem precisar clicar em Salvar. Estas imagens são só deste evento. A imagem de compartilhamento é obrigatória para publicar.
           </p>
-          <ImageUpload endpoint={endpoint} kind="cover" currentUrl={media.cover} inherited={inherit(artist.cover)} />
-          <ImageUpload endpoint={endpoint} kind="cover_mobile" currentUrl={media.coverMobile} inherited={inherit(artist.coverMobile)} />
+          <ImageUpload endpoint={endpoint} kind="cover" currentUrl={media.cover} />
+          <ImageUpload endpoint={endpoint} kind="cover_mobile" currentUrl={media.coverMobile} />
           <VideoUpload endpoint={endpoint} current={media.video} direct={directVideoUpload} />
-          <ImageUpload
-            endpoint={endpoint}
-            kind="og_image"
-            currentUrl={media.ogImage}
-            inherited={artist.ogImage ? { url: artist.ogImage, label: artist.name } : null}
-          />
+          <ImageUpload endpoint={endpoint} kind="og_image" currentUrl={media.ogImage} />
         </div>
       </StepForm>
       <div className="bo-preview" aria-label="Pré-visualização">

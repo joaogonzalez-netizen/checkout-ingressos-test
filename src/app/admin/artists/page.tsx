@@ -25,7 +25,7 @@ export default async function ArtistsPage({ searchParams }: PageProps<"/admin/ar
       <div className="bo-page-head">
         <div>
           <h1>Artistas</h1>
-          <p className="muted">Identidade, pixel e textos cadastrados uma vez e herdados por todos os shows.</p>
+          <p className="muted">Marca, cores, pixel e textos cadastrados uma vez e herdados por todos os shows. As imagens são de cada evento.</p>
         </div>
         <Link href="/admin/artists/new" className="bo-btn bo-btn-primary">
           + Novo artista

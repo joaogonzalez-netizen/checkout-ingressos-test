@@ -372,3 +372,19 @@ a.bo-btn-primary, a.bo-btn-primary:hover { color: var(--white); }
   .bo-checkin-table .bo-btn, .bo-checkin-table .bo-btn-pill { min-height: 44px; padding-left: 16px; padding-right: 16px; }
   .bo-checkin-bar .bo-actions { margin-left: 0; }
 }
+
+/* Lista de eventos: paginação */
+.bo-pager { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--n-200); }
+.bo-pager .bo-actions { gap: 14px; }
+
+/* Conferência na porta (link + PIN) */
+.bo-door { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px; align-items: start; }
+@media (max-width: 760px) { .bo-door { grid-template-columns: 1fr; } }
+.bo-door-main { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.bo-door-main .bo-actions input { flex: 1; min-width: 0; }
+.bo-door-pin { background: var(--g-50); border: 1px solid var(--g-100); border-radius: 12px; padding: 12px 14px; }
+.bo-door-pin > span { font-size: 12px; font-weight: 600; color: var(--g-700); }
+.bo-door-pin > div { display: flex; align-items: center; gap: 14px; margin-top: 4px; flex-wrap: wrap; }
+.bo-door-pin b { font-size: 30px; letter-spacing: 0.3em; font-variant-numeric: tabular-nums; }
+.bo-door-qr { margin: 0; text-align: center; max-width: 170px; }
+.bo-door-qr img { border: 1px solid var(--n-200); border-radius: 12px; padding: 6px; background: #fff; }

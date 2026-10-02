@@ -3,20 +3,25 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { parsePalette } from "@/lib/palette";
-import { formatDateTime } from "@/lib/dates";
+import { fromLocalDateTime, todayLocal } from "@/lib/dates";
 import { ArtistForm } from "../ArtistForm";
 import { ArtistDangerZone } from "../ArtistDangerZone";
-import { EVENT_STATUS_LABEL } from "../../events/labels";
 
 export default async function ArtistPage({ params, searchParams }: PageProps<"/admin/artists/[id]">) {
   await requireAdmin();
   const { id } = await params;
   const { created } = await searchParams;
-  const artist = await db.artist.findUnique({
-    where: { id },
-    include: { events: { orderBy: { startsAt: "desc" }, include: { _count: { select: { orders: true } } } } },
-  });
+  const artist = await db.artist.findUnique({ where: { id } });
   if (!artist) notFound();
+
+  // O artista pode ter centenas de eventos por ano: aqui só números; a lista fica em Eventos (filtrada por artista).
+  const startOfToday = fromLocalDateTime(todayLocal(), "00:00") ?? new Date();
+  const [totalEvents, upcomingEvents, publishedEvents, eventsWithOrders] = await Promise.all([
+    db.event.count({ where: { artistId: id } }),
+    db.event.count({ where: { artistId: id, archivedAt: null, OR: [{ startsAt: { gte: startOfToday } }, { startsAt: null }] } }),
+    db.event.count({ where: { artistId: id, status: "published" } }),
+    db.event.count({ where: { artistId: id, orders: { some: {} } } }),
+  ]);
 
   return (
     <>
@@ -42,52 +47,13 @@ export default async function ArtistPage({ params, searchParams }: PageProps<"/a
       )}
       {created && <p className="bo-success" style={{ marginBottom: 16 }}>Artista cadastrado. Agora você já pode criar os eventos.</p>}
 
-      <div className="bo-card" style={{ marginBottom: 16 }}>
-        <h2>Eventos</h2>
-        {artist.events.length === 0 ? (
-          <div className="bo-empty">Nenhum evento ainda.</div>
-        ) : (
-          <table className="bo-table">
-            <tbody>
-              {artist.events.map((e) => (
-                <tr key={e.id}>
-                  <td>
-                    <Link href={`/admin/events/${e.id}`}>
-                      <b>{e.showName ?? "Rascunho sem nome"}</b>
-                    </Link>
-                    <div className="small muted">
-                      {[e.city && `${e.city}/${e.state}`, e.venueName].filter(Boolean).join(" · ")}
-                    </div>
-                  </td>
-                  <td>{formatDateTime(e.startsAt) || <span className="muted">sem data</span>}</td>
-                  <td>
-                    <span className={`bo-badge ${e.status}`}>{EVENT_STATUS_LABEL[e.status]}</span>
-                    {e.archivedAt && (
-                      <>
-                        {" "}
-                        <span className="bo-badge archived">Arquivado</span>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
       <ArtistForm
         initial={{
           id: artist.id,
           name: artist.name,
           slug: artist.slug,
           backLinkUrl: artist.backLinkUrl ?? "",
-          images: {
-            logo: artist.logoUrl,
-            cover: artist.defaultCoverUrl,
-            cover_mobile: artist.defaultCoverMobileUrl,
-            og_image: artist.defaultOgImageUrl,
-          },
+          images: { logo: artist.logoUrl },
           colors: parsePalette(artist.colors),
           metaPixelId: artist.metaPixelId ?? "",
           hasCapiToken: !!artist.metaCapiTokenEnc,
@@ -96,14 +62,32 @@ export default async function ArtistPage({ params, searchParams }: PageProps<"/a
         }}
       />
 
+      <div className="bo-card" style={{ marginTop: 16 }}>
+        <div className="bo-page-head" style={{ marginBottom: 0 }}>
+          <div>
+            <h2 style={{ marginBottom: 2 }}>Eventos</h2>
+            <p className="muted" style={{ margin: 0 }}>
+              {totalEvents === 0
+                ? "Nenhum evento ainda."
+                : `${totalEvents} ${totalEvents === 1 ? "evento" : "eventos"} no total · ${upcomingEvents} ${upcomingEvents === 1 ? "próximo" : "próximos"}`}
+            </p>
+          </div>
+          {totalEvents > 0 && (
+            <Link href={`/admin/events?artista=${artist.id}`} className="bo-btn">
+              Ver eventos de {artist.name} →
+            </Link>
+          )}
+        </div>
+      </div>
+
       <div style={{ marginTop: 16 }}>
         <ArtistDangerZone
           artistId={artist.id}
           name={artist.name}
           archived={!!artist.archivedAt}
-          totalEvents={artist.events.length}
-          publishedEvents={artist.events.filter((e) => e.status === "published").length}
-          eventsWithOrders={artist.events.filter((e) => e._count.orders > 0).length}
+          totalEvents={totalEvents}
+          publishedEvents={publishedEvents}
+          eventsWithOrders={eventsWithOrders}
         />
       </div>
     </>

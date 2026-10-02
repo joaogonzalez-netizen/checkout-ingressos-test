@@ -30,12 +30,10 @@ type Props = {
   endpoint: string;
   kind: ImageKind;
   currentUrl: string | null;
-  /** Imagem herdada (ex.: header padrão do artista), mostrada quando não há uma própria. */
-  inherited?: { url: string; label: string } | null;
   disabledReason?: string;
 };
 
-export function ImageUpload({ endpoint, kind, currentUrl, inherited, disabledReason }: Props) {
+export function ImageUpload({ endpoint, kind, currentUrl, disabledReason }: Props) {
   const spec = IMAGE_SPECS[kind];
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
@@ -43,7 +41,7 @@ export function ImageUpload({ endpoint, kind, currentUrl, inherited, disabledRea
   const [progress, setProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
-  const shown = url ?? inherited?.url ?? null;
+  const shown = url;
 
   async function onFile(file: File) {
     setError(null);
@@ -88,7 +86,6 @@ export function ImageUpload({ endpoint, kind, currentUrl, inherited, disabledRea
           ) : (
             <span className="bo-hint">Nenhuma imagem</span>
           )}
-          {!url && inherited && <span className="bo-upload-tag">Herdado: {inherited.label}</span>}
         </div>
         <MediaSpec
           rows={[

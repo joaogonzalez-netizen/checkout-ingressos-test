@@ -23,20 +23,15 @@ export function buildSeatRows(seats: Pick<Seat, "id" | "row" | "number" | "statu
   return [...rows.values()];
 }
 
-/** Header e vídeo do evento; sem header próprio, herda o header padrão do artista. */
-export function templateMedia(
-  media: EventMedia[] = [],
-  artist: Pick<Artist, "defaultCoverUrl" | "defaultCoverMobileUrl">,
-): { cover: TemplateCover | null; video: TemplateVideo | null } {
+/** Header e vídeo são do evento: não há herança do cadastro do artista. */
+export function templateMedia(media: EventMedia[] = []): { cover: TemplateCover | null; video: TemplateVideo | null } {
   const cover = media.find((m) => m.kind === "cover")?.url ?? null;
   const coverMobile = media.find((m) => m.kind === "cover_mobile")?.url ?? null;
   const video = media.find((m) => m.kind === "video");
-  // O par desktop/mobile vem de um lugar só, para não misturar a arte do evento com a do artista.
-  const own = cover || coverMobile;
-  const desktop = own ? (cover ?? coverMobile) : (artist.defaultCoverUrl ?? artist.defaultCoverMobileUrl);
-  const mobile = own ? coverMobile : artist.defaultCoverMobileUrl;
+  // Só a versão de celular? Ela também serve no desktop.
+  const desktop = cover ?? coverMobile;
   return {
-    cover: desktop ? { desktop, mobile: mobile ?? null } : null,
+    cover: desktop ? { desktop, mobile: coverMobile } : null,
     // Só vídeo em pé (Reels, 9:16) é aceito no upload.
     video: video ? { url: video.url, poster: video.posterUrl } : null,
   };
@@ -74,7 +69,7 @@ export function toTemplateData(e: FullEvent, opts: { pixelEnabled: boolean; sett
     vslHeadline: e.vslHeadline || defaultHeadline(e.artist.name, city),
     vslSubtitle: e.vslSubtitle ?? e.artist.defaultVslSubtitle ?? "",
     vslCtaLabel: e.vslCtaLabel || "Quero garantir meu ingresso",
-    ...templateMedia(e.media, e.artist),
+    ...templateMedia(e.media),
     seated: e.seatingMode === "seated",
     maxPerOrder: MAX_TICKETS_PER_ORDER,
     seatRows: e.seatingMode === "seated" ? buildSeatRows(e.seats) : [],

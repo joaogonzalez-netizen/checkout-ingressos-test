@@ -80,12 +80,6 @@ export default async function EditStep({ params }: PageProps<"/admin/events/[id]
             ? { url: video.url, posterUrl: video.posterUrl, width: video.width ?? 16, height: video.height ?? 9, duration: video.durationSeconds ?? 0 }
             : null,
         }}
-        artist={{
-          name: event.artist.name,
-          cover: event.artist.defaultCoverUrl,
-          coverMobile: event.artist.defaultCoverMobileUrl,
-          ogImage: event.artist.defaultOgImageUrl,
-        }}
       />
     );
   } else if (step === 3) {

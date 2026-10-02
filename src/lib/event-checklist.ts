@@ -17,7 +17,7 @@ export function eventChecklist(e: FullEvent): ChecklistItem[] {
     { step: 1, label: "Classificação indicativa", done: !!e.ageRating },
     { step: 1, label: "Slug da URL", done: !!e.slug },
     { step: 2, label: "Headline da VSL", done: !!e.vslHeadline },
-    { step: 2, label: "Imagem de compartilhamento (og:image)", done: !!(e.ogImageUrl || e.artist.defaultOgImageUrl) },
+    { step: 2, label: "Imagem de compartilhamento (og:image)", done: !!e.ogImageUrl },
     { step: 3, label: "Limite de ingressos definido", done: !!e.ticketLimit && e.ticketLimit > 0 },
     { step: 3, label: "Ao menos um lote", done: e.lots.length > 0 },
     { step: 3, label: "Soma dos lotes dentro do limite", done: !!e.ticketLimit && lotsTotal <= e.ticketLimit },
