@@ -233,7 +233,11 @@ export function EventFooter({ data }: { data: TemplateData }) {
           </p>
         </div>
         <div>
-          <h3>Precisando de ajuda?</h3>
+          <h3>Já comprou?</h3>
+          <p>
+            <a href={`/meus-ingressos?e=${encodeURIComponent(data.slug)}`}>Ver meus ingressos</a> com o CPF (ou celular) e o e-mail da compra.
+          </p>
+          <h3 style={{ marginTop: 18 }}>Precisando de ajuda?</h3>
           {s.whatsapp || s.email ? (
             <p>
               {s.whatsapp && (

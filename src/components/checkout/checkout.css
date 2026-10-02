@@ -404,3 +404,64 @@
 .tpl .tpl-footer-legal { max-width: 1000px; margin: 24px auto 0; padding-top: 16px; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12px; }
 
 .tpl .demo-banner { background: #1d2327; color: #ffe08a; font-size: 12.5px; font-weight: 700; text-align: center; padding: 8px 12px; letter-spacing: 0.01em; }
+
+/* Compra em duas etapas: indicador, resumo da etapa 1 e botão que libera a etapa 2 */
+.tpl .checkout-steps { list-style: none; margin: 0 0 22px; padding: 0; display: flex; gap: 10px; flex-wrap: wrap; }
+.tpl .checkout-steps li {
+  display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; padding: 8px 14px 8px 8px;
+  border-radius: 999px; border: 1px solid var(--border); color: var(--text-soft);
+}
+.tpl .checkout-steps li.current { background: color-mix(in srgb, var(--magenta) 12%, var(--surface)); border-color: var(--magenta); color: var(--text); }
+.tpl .checkout-steps li.done { color: var(--text); }
+.tpl .checkout-steps button { all: unset; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.tpl .checkout-steps button:focus-visible { outline: 3px solid var(--magenta); outline-offset: 4px; border-radius: 999px; }
+.tpl .cs-num {
+  width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px;
+  background: var(--border); color: var(--text);
+}
+.tpl .checkout-steps .current .cs-num, .tpl .checkout-steps .done .cs-num { background: var(--magenta); color: #fff; }
+.tpl .checkout-steps + .step-label, .tpl .checkout-steps + .step-recap { margin-top: 0; }
+.tpl .step-label:focus { outline: none; }
+.tpl .step-label:focus-visible { outline: 3px solid var(--magenta); outline-offset: 4px; border-radius: 6px; }
+.tpl .step-next { margin-top: 22px; display: flex; flex-direction: column; gap: 10px; }
+.tpl .step-next-hint { margin: 0; font-size: 13px; font-weight: 600; color: var(--text-soft); text-align: center; }
+.tpl .step-next .checkout-cta { margin-top: 0; }
+.tpl .step-recap {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; margin-bottom: 18px;
+  border: 1px solid var(--border); border-radius: 12px; background: var(--bg);
+}
+.tpl .step-recap > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.tpl .step-recap b { font-size: 14px; }
+.tpl .step-recap span { font-size: 12.5px; color: var(--text-soft); overflow-wrap: anywhere; }
+.tpl .step-recap .link-btn { white-space: nowrap; font-weight: 600; color: var(--magenta); }
+
+/* Topo: link "Meus ingressos" ao lado do tema */
+.tpl .nav-actions { display: flex; align-items: center; gap: 12px; }
+.tpl .nav-link { font-size: 13.5px; font-weight: 700; color: var(--text); padding: 10px 4px; white-space: nowrap; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--border); }
+.tpl .nav-link:hover { text-decoration-color: var(--magenta); }
+
+/* Meus ingressos */
+.tpl .lookup-wrap { max-width: 720px; }
+.tpl .lookup-card { padding: 24px; }
+.tpl .lookup-card .checkout-cta { margin-top: 4px; }
+.tpl .lookup-empty { margin-top: 18px; padding: 22px; }
+.tpl .lookup-empty p { margin: 8px 0 0; color: var(--text-soft); line-height: 1.55; }
+.tpl .lookup-event { margin-top: 28px; }
+.tpl .lookup-event h2 { font-size: 20px; margin: 0 0 4px; }
+.tpl .lookup-event header p { margin: 0; color: var(--text-soft); font-size: 14px; }
+.tpl .lookup-past { display: inline-block; margin-top: 8px; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--border); }
+.tpl .lookup-tickets { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.tpl .lookup-pass { display: flex; gap: 18px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: var(--shadow); }
+.tpl .lookup-pass img { flex-shrink: 0; background: #fff; padding: 8px; border-radius: 12px; width: 160px; height: 160px; }
+.tpl .lookup-pass.used img { opacity: 0.35; }
+.tpl .lookup-pass-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; font-size: 14px; }
+.tpl .lookup-code { font-size: 30px; font-weight: 800; letter-spacing: 0.22em; line-height: 1.1; }
+.tpl .lookup-status { align-self: flex-start; margin-top: 6px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+.tpl .lookup-status.valid { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+.tpl .lookup-status.used { background: var(--border); color: var(--text-soft); }
+.tpl .lookup-tip { font-size: 13px; color: var(--text-soft); margin: 12px 0 0; }
+@media (max-width: 520px) {
+  .tpl .lookup-pass { flex-direction: column; text-align: center; }
+  .tpl .lookup-pass-info { align-items: center; }
+  .tpl .lookup-status { align-self: center; }
+}

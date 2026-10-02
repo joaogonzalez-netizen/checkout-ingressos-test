@@ -114,6 +114,10 @@ export function CheckoutTemplate({ data, mode = "live" }: Props) {
   const [now, setNow] = useState(() => Date.now());
   const initiated = useRef(false);
   const seatGridRef = useRef<HTMLDivElement>(null);
+  // Compra em duas etapas: 1) ingressos (e poltrona); 2) dados e pagamento, liberada pelo botão "Continuar".
+  const [step, setStep] = useState<1 | 2>(1);
+  const stepHeadingRef = useRef<HTMLHeadingElement>(null);
+  const stepChanged = useRef(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
   // Primeira dobra: a capa encolhe (sem cortar) o quanto for preciso para título, data, local e o botão de compra
@@ -147,6 +151,17 @@ export function CheckoutTemplate({ data, mode = "live" }: Props) {
 
   const selected = data.lots.filter((l) => (qty[l.id] ?? 0) > 0).map((l) => ({ lot: l, quantity: qty[l.id] }));
   const count = selected.reduce((a, i) => a + i.quantity, 0);
+  const canContinue = count > 0 && (!data.seated || !!seatId);
+  function goStep(next: 1 | 2) {
+    if (next === 2 && !canContinue) return;
+    stepChanged.current = true;
+    setStep(next);
+    document.getElementById("checkoutSection")?.scrollIntoView({ behavior: "smooth" });
+  }
+  // Ao trocar de etapa o foco vai para o título da nova etapa (teclado e leitor de tela).
+  useEffect(() => {
+    if (stepChanged.current) stepHeadingRef.current?.focus({ preventScroll: true });
+  }, [step]);
 
   function changeQty(lotId: string, delta: number) {
     setErrors((e) => ({ ...e, lot: "" }));
@@ -290,9 +305,14 @@ export function CheckoutTemplate({ data, mode = "live" }: Props) {
               data.artistName
             )}
           </div>
-          <button className="theme-toggle" type="button" onClick={toggleTheme} aria-label="Alternar tema claro/escuro">
-            {theme === "dark" ? "☀️" : "🌙"}
-          </button>
+          <div className="nav-actions">
+            <a className="nav-link" href={`/meus-ingressos?e=${encodeURIComponent(data.slug)}`}>
+              Meus ingressos
+            </a>
+            <button className="theme-toggle" type="button" onClick={toggleTheme} aria-label="Alternar tema claro/escuro">
+              {theme === "dark" ? "☀️" : "🌙"}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -421,11 +441,27 @@ export function CheckoutTemplate({ data, mode = "live" }: Props) {
               </div>
             ) : (
               <>
+                <ol className="checkout-steps" aria-label="Etapas da compra">
+                  <li className={step === 1 ? "current" : "done"} aria-current={step === 1 ? "step" : undefined}>
+                    {step === 2 ? (
+                      <button type="button" onClick={() => goStep(1)}>
+                        <span className="cs-num">✓</span> Ingressos
+                      </button>
+                    ) : (
+                      <>
+                        <span className="cs-num">1</span> Ingressos
+                      </>
+                    )}
+                  </li>
+                  <li className={step === 2 ? "current" : "locked"} aria-current={step === 2 ? "step" : undefined}>
+                    <span className="cs-num">2</span> Dados e pagamento
+                  </li>
+                </ol>
+                {step === 1 && (
+                  <>
                 {data.seated && (
                   <>
-                    <div className="step-label">
-                      <span className="step-num">1</span> Escolha sua poltrona
-                    </div>
+                    <h3 className="step-label" ref={stepHeadingRef} tabIndex={-1}>Escolha sua poltrona</h3>
                     <div className="seat-legend">
                       <span>
                         <i className="dot available" /> Disponível
@@ -465,9 +501,7 @@ export function CheckoutTemplate({ data, mode = "live" }: Props) {
                   </>
                 )}
 
-                <div className="step-label">
-                  <span className="step-num">{data.seated ? 2 : 1}</span> {data.seated ? "Escolha o lote" : "Escolha seus ingressos"}
-                </div>
+                <h3 className="step-label" ref={data.seated ? undefined : stepHeadingRef} tabIndex={-1}>{data.seated ? "Escolha o lote" : "Escolha seus ingressos"}</h3>
                 {data.seated ? (
                   <div className="lot-options">
                     {data.lots.map((l) => (
@@ -538,9 +572,39 @@ export function CheckoutTemplate({ data, mode = "live" }: Props) {
                 )}
                 {errors.lot && <div className="field-error">{errors.lot}</div>}
 
-                <div className="step-label">
-                  <span className="step-num">{data.seated ? 3 : 2}</span> Seus dados
+                <div className="step-next">
+                  <p className="step-next-hint" aria-live="polite">
+                    {canContinue
+                      ? `${count} ${count === 1 ? "ingresso" : "ingressos"} · ${formatBRL(baseCents)}`
+                      : data.seated && !seatId
+                        ? "Escolha uma poltrona para continuar."
+                        : "Escolha ao menos 1 ingresso para continuar."}
+                  </p>
+                  <button className="checkout-cta" type="button" onClick={() => goStep(2)} disabled={!canContinue}>
+                    Continuar →
+                  </button>
                 </div>
+                  </>
+                )}
+
+                {step === 2 && (
+                  <>
+                <div className="step-recap">
+                  <div>
+                    <b>
+                      {count} {count === 1 ? "ingresso" : "ingressos"} · {formatBRL(baseCents)}
+                    </b>
+                    <span>
+                      {selected.map((i) => `${i.quantity}x ${i.lot.name}`).join(" · ")}
+                      {seatCode ? ` · poltrona ${seatCode}` : ""}
+                    </span>
+                  </div>
+                  <button type="button" className="link-btn" onClick={() => goStep(1)}>
+                    Alterar ingressos
+                  </button>
+                </div>
+
+                <h3 className="step-label" ref={stepHeadingRef} tabIndex={-1}>Seus dados</h3>
                 <div className="field-row">
                   <label htmlFor="buyerName">Nome completo</label>
                   <input
@@ -596,9 +660,7 @@ export function CheckoutTemplate({ data, mode = "live" }: Props) {
                   {errors.phone && <div className="field-error">{errors.phone}</div>}
                 </div>
 
-                <div className="step-label">
-                  <span className="step-num">{data.seated ? 4 : 3}</span> Pagamento e dados do comprador
-                </div>
+                <h3 className="step-label">Pagamento</h3>
                 <div className="pay-methods">
                   <label className={`pay-method${method === "credit_card" ? " selected" : ""}`}>
                     <input
@@ -734,6 +796,8 @@ export function CheckoutTemplate({ data, mode = "live" }: Props) {
                 <p className="legal-note">
                   Cancelamento em até 7 dias após a compra e até 48 h antes do evento. <a href="#politica">Ver política</a>.
                 </p>
+                  </>
+                )}
               </>
             )}
           </div>
