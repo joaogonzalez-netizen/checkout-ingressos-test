@@ -75,3 +75,8 @@ Com Postgres de verdade, remova a variável e crie migrations com `npx prisma mi
 - A duração do vídeo é lida pelo navegador; o servidor confere o limite e o tipo do arquivo, mas não decodifica o vídeo.
 - Fase 2 (envio do ingresso) e Fase 3 (webapp de check-in com câmera, offline e PIN) têm tabelas prontas
   (`tickets`, `checkin_access`), mas ainda não têm telas. A Conferência em lista já usa a mesma checagem de "já usado".
+
+## Documentação de regras
+
+- [Regras do Backoffice](docs/regras-backoffice.md): acesso, usuários, artistas, eventos, mídias, preços, vendas, check-in, configurações.
+- [Regras das páginas de venda](docs/regras-paginas-de-venda.md): estrutura da página, compra em duas etapas, pagamento, Meus ingressos, rastreamento.
