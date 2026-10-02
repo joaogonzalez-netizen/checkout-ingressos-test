@@ -61,17 +61,25 @@ Uma só barra lateral (no celular, o botão ☰ abre a mesma barra como gaveta):
 | Check-in | Conferência na portaria. |
 | Configurar | As 6 etapas de cadastro, inclusive a **Publicação**. |
 
+**Lista de Eventos** (menu Eventos), feita para centenas de eventos por ano:
+- **Abas por período:** **Próximos** (ainda vão acontecer, mais perto primeiro; inclui rascunhos sem data) · **Passados** (já aconteceram, mais recentes primeiro) · **Arquivados**. Cada aba mostra a contagem.
+- **Busca** por nome do show, cidade, local ou artista, e **filtro por artista**. A busca e o filtro valem para as três abas e para as contagens.
+- **Paginação de 30 em 30**, com "Anterior / Próxima" e o intervalo mostrado ("31–60 de 412").
+- Rascunho abre na **Configuração**; os demais abrem na **Visão geral**.
+
 - **Rascunho novo** abre direto em **Configurar** (próxima etapa pendente). **Evento publicado** abre em **Visão geral**. Em **Configurar**, um evento já publicado abre em "Dados do evento".
 
 ## 4. Artistas
 
 Todo evento nasce de um artista. O artista guarda a identidade que os eventos herdam.
 
+**A tela do artista é simples.** Abre direto nos dados dele (identidade, cores, pixel, textos padrão). Os eventos aparecem só como um **resumo** ("412 eventos no total · 38 próximos") com o link **Ver eventos de {artista}**, que abre a lista de Eventos já filtrada por ele. Um artista pode ter centenas de eventos por ano; a lista completa nunca fica nessa tela.
+
 **Dados do artista**
 - Nome e **slug** (único, usado para montar o endereço dos eventos).
 - **Logo** (aparece no topo das páginas de venda).
 - **Cores:** escolha só a **cor principal**; o sistema sugere as outras 3 (secundária, destaque e fundo), e todas podem ser editadas. Há alerta de **contraste** quando uma combinação dificulta a leitura.
-- **Header padrão** (desktop e celular) e **imagem de compartilhamento padrão**, usados por todos os eventos que não tiverem os próprios.
+- **Só o logo é do artista** (é a marca). **Header, vídeo e imagem de compartilhamento são de cada evento**, na etapa "Página": não existe imagem padrão do artista e os eventos não herdam imagens.
 - Textos padrão do espetáculo e da chamada, e link de volta à agenda do artista.
 - **Pixel do Meta** e token da API de Conversões, valendo para todos os eventos (cada evento pode sobrescrever). O token é guardado criptografado.
 
@@ -110,7 +118,7 @@ A etapa 0 (escolher o artista) vem antes, em "Novo evento", e é obrigatória.
 - **Título da chamada (headline)** é obrigatório (4 caracteres ou mais). Subtítulo e texto do botão são editáveis.
 - **Descrição do evento** e **regras de acesso** (listas começam com "- "). Há um texto padrão de regras que pode ser editado.
 - **Mídias** (limites na seção 7). A tela mostra uma pré-visualização da página.
-- **Imagem de compartilhamento (og:image):** obrigatória para publicar (vale a do evento ou, se não houver, a padrão do artista).
+- **Imagem de compartilhamento (og:image):** obrigatória para publicar (sempre a do próprio evento; não há imagem padrão do artista).
 
 ### Etapa 3: Ingressos
 - **Limite de ingressos do evento:** obrigatório e maior que zero.
@@ -162,7 +170,7 @@ Aceitos: JPG, PNG e WebP para imagens; MP4 (H.264) e MOV para vídeo. **SVG não
 | Imagem de compartilhamento | 1200 × 630 px (1,91:1), recortada para 1200 × 630 | 5 MB |
 | Vídeo da chamada | **Em pé, 9:16** (formato Reels), 1080 × 1920 px | **100 MB** e **até 2 minutos** |
 
-- **O header aparece inteiro, sem corte.** Se o header celular não existir, o celular usa o do desktop. Evento sem header próprio herda o do artista.
+- **O header aparece inteiro, sem corte.** Se o header celular não existir, o celular usa o do desktop. Evento sem header fica sem imagem de capa (não herda do artista).
 - O **vídeo** só é aceito em pé (9:16, com tolerância de 10%). O envio vai direto do navegador para o armazenamento, por isso o limite de 100 MB e não o de 4,5 MB das funções. Gravado no iPhone: ajuste **Câmera › Formatos › Mais Compatível**, senão o vídeo sai em HEVC e não toca no Chrome.
 - A tela de upload mostra o formato, o tamanho e a prévia antes de salvar.
 
@@ -190,14 +198,40 @@ Regras fixas da plataforma, que o administrador não edita (`lib/money.ts`):
 
 ## 10. Check-in
 
-Três formas de conferir, todas caindo na mesma regra de validação (um único registro atômico, sem dar entrada duas vezes):
+Duas formas de operar a conferência: **o link da portaria** (para a equipe, no celular) e **a tela do admin** (aba Check-in do evento). As duas usam a mesma regra de validação (um único registro atômico, sem dar entrada duas vezes).
 
-- **Lista:** uma busca única por nome (ignora acento), e-mail ou telefone; também aceita código ou número do pedido. Botão "Fazer check-in" por participante. Contador "Check-ins feitos X de Y". Dá para **exportar** e **imprimir** a lista.
-- **Código / QR:** digitar o código de 4 caracteres (sem 0, O, 1, I, L) ou ler o QR.
+### Link da portaria (equipe, sem conta de admin)
+
+Na aba **Check-in** do evento, o bloco **Conferência na porta** cria o link `/conferencia/{código}` do evento.
+
+- **Um link ativo por evento.** Criar um novo desativa o anterior. Só dá para criar com o evento **publicado** ou encerrado, nunca rascunho.
+- **PIN de 6 números**, gerado na criação e **mostrado uma única vez** (o sistema guarda só um hash). Perdeu? **Gerar novo PIN**: quem estava conectado com o antigo é **desconectado na hora**.
+- **Desativar o link** desconecta toda a equipe na hora.
+- **O link expira sozinho 24 h depois do fim do evento** (ou do início, se não houver horário de término).
+- O bloco mostra o link, um **QR Code do link** (para abrir com a câmera do celular da equipe), a data de criação e a validade.
+- **Entrada da equipe:** cada pessoa informa **o nome** e o **PIN**. O nome fica registrado em cada entrada ("Porta · Ana"). **8 PINs errados bloqueiam o link por 10 minutos** (vale para todos, até para o PIN certo).
+- A sessão da equipe dura até 14 h, vale só para aquele evento e **nunca dá acesso ao backoffice**.
+- Criar, trocar PIN e desativar ficam na **auditoria**.
+
+**O que a equipe faz na tela da portaria**
+- **A leitura do QR pela câmera é o método padrão:** a câmera abre sozinha ao entrar e volta a abrir a cada "Próximo cliente". Se a câmera estiver bloqueada ou indisponível, a tela avisa e a busca continua funcionando.
+- **Alternativas, logo abaixo da câmera:** **código de 4 caracteres** ou **busca por nome (sem acento) ou telefone** (também aceita o nome mesmo parecendo código, como "Ruth"). Ao buscar por texto, a câmera fecha para poupar bateria e reabre no próximo cliente.
+- Em qualquer caso a tela mostra **a compra inteira**: nome do comprador, final do telefone e **todos os ingressos da compra**, cada um com código, lote, poltrona e situação (Pendente, Entrou às … por …, Cancelado). O ingresso que o cliente apresentou vem destacado ("lido agora"). Se a busca achar **mais de uma compra**, aparece uma lista para escolher.
+- **Liberar:** os ingressos pendentes já vêm marcados; desmarque quem ainda não chegou e toque em **Liberar N entradas**. Quem chega depois entra pela mesma compra.
+- **Resultado claro:** faixa verde com as entradas liberadas, ou vermelha quando algo não pode entrar (**já utilizado** com a hora e quem liberou, **cancelado/estornado**, **QR de outro evento**, **QR com assinatura inválida**, ingresso inexistente).
+- **Dois celulares na porta:** se outro aparelho liberar o ingresso antes, o sistema não libera em dobro e avisa quem entrou e a que horas.
+- Topo com **contador "X de Y"** e barra de progresso, atualizados a cada ação. Funciona **online** (conferência na hora no servidor).
+- A equipe **não desfaz** entrada; desfazer é do admin.
+
+### Tela do admin (aba Check-in)
+- **Lista:** busca única por nome (ignora acento), e-mail ou telefone; também aceita código ou número do pedido. Botão "Fazer check-in" por participante. Contador "Check-ins feitos X de Y". Dá para **exportar** e **imprimir** a lista.
+- **Código / QR:** digitar o código de 4 caracteres (sem 0, O, 1, I, L) ou usar leitor USB.
+- **Desfazer check-in** exige um **motivo (3 caracteres ou mais)** e fica na auditoria com quem desfez.
+- Todo check-in registra o método (QR, código, lista) e quem fez.
+
+### Regras comuns
 - **QR assinado:** cada ingresso tem um QR com assinatura (HMAC). Se a assinatura não confere, ou o QR é de **outro evento**, o sistema recusa.
 - Resultados possíveis: **válido**, **já utilizado** (mostra quando), **cancelado** (pedido estornado), **de outro evento**, **código/QR inválido**.
-- **Desfazer check-in** exige um **motivo (3 caracteres ou mais)**, e fica na auditoria com quem desfez.
-- Todo check-in registra o método (QR, código, lista, manual) e quem fez.
 - Eventos com **vendas encerradas continuam com check-in**.
 - Em ambiente de teste existe gerador de participantes fictícios.
 
@@ -225,5 +259,5 @@ Itens que **ainda não existem**, ou que precisam de decisão antes de vender de
 6. **Lugar marcado:** desativado. Código do mapa existe, mas a escolha está bloqueada.
 7. **Cortesia (ingresso gratuito)** e **perfis além de Admin:** fora desta versão.
 8. **Tela de auditoria** e **botão de estorno** no backoffice: não existem.
-9. **Perfil só para a portaria** (check-in sem acesso ao resto): ainda não existe; hoje a equipe de porta precisaria ser Admin.
+9. **Conferência offline:** a portaria exige internet no local. Modo com queda de conexão (guardar a lista no celular e sincronizar depois) ficou para uma próxima fase.
 10. **Outros pixels** (Google, TikTok): fora do escopo. Só Meta.

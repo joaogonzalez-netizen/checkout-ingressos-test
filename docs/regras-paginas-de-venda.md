@@ -46,7 +46,7 @@ A ordem das seções é uma regra: informar primeiro, comprar depois. Os botões
 - **Esquerda:** título do show em maiúsculas (é o `h1` da página), **data, horário e local com ícones**, endereço em destaque que abre o mapa, selo de **classificação indicativa**, selo **"Parcele em até 12x"** e o botão **Comprar ingressos** com "a partir de R$ …".
 - **Direita:** a **capa inteira, sem corte**, em cartão arredondado, com o botão branco **Compartilhar** sobre a borda de baixo.
 - **No celular** a capa vem primeiro e as informações logo abaixo. A capa encolhe (sem cortar) o quanto for preciso para que **título, data, local e o botão de compra apareçam na primeira tela**, contando as faixas de aviso e o topo fixo.
-- **Capa:** a de celular (vertical, 4:5) é usada em telas de até 640 px; sem ela vale a do desktop. Evento sem capa própria herda a do artista.
+- **Capa:** a de celular (vertical, 4:5) é usada em telas de até 640 px; sem ela vale a do desktop. O header é sempre do próprio evento; sem ele, a página fica sem imagem de capa (nada vem do cadastro do artista).
 - O horário mostra início e, se cadastrados, portões e término; sem esses dados aparece "Horários referentes ao local do evento".
 - **"a partir de R$ …"** é o menor preço entre os lotes ainda à venda. Se tudo esgotar, o botão vira **"Ver ingressos"**.
 - **Compartilhar** usa o menu do celular; no computador copia o link e mostra "Link copiado!".
